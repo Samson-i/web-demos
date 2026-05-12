@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lin Wei — 设计师 & 开发者</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f8f7f4;
+    --accent: #e8ff47;
+    --gray: #999;
+    --line: #e0deda;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--white);
+    color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+  /* CURSOR */
+  .cursor {
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed; pointer-events: none;
+    z-index: 9999; transition: transform 0.15s;
+    mix-blend-mode: multiply;
+  }
+
+  /* HEADER */
+  header {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    padding: 2rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--white);
+    border-bottom: 1px solid var(--line);
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem; letter-spacing: 0.02em;
+  }
+  .header-right {
+    display: flex; align-items: center; gap: 3rem;
+  }
+  .header-right a {
+    text-decoration: none; color: var(--black);
+    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em;
+    opacity: 0.4; transition: opacity 0.2s;
+  }
+  .header-right a:hover { opacity: 1; }
+  .hire-btn {
+    background: var(--black) !important; color: var(--white) !important;
+    padding: 0.6rem 1.5rem !important; opacity: 1 !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 14rem 3rem 6rem;
+    position: relative;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border: 1px solid var(--line); padding: 0.4rem 1rem;
+    border-radius: 99px; font-size: 0.72rem;
+    letter-spacing: 0.08em; margin-bottom: 3rem;
+    opacity: 0; animation: fadeIn 0.8s 0.2s forwards;
+  }
+  .dot { width: 6px; height: 6px; background: #4CAF50; border-radius: 50%; animation: pulse 2s infinite; }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(3.5rem, 8vw, 8rem);
+    line-height: 0.95; font-weight: 400;
+    max-width: 14ch;
+    opacity: 0; animation: fadeIn 0.8s 0.4s forwards;
+  }
+  .hero h1 em { font-style: italic; }
+  .hero-meta {
+    margin-top: 4rem;
+    display: flex; gap: 6rem; align-items: flex-start;
+    opacity: 0; animation: fadeIn 0.8s 0.6s forwards;
+  }
+  .hero-desc {
+    max-width: 36ch; font-size: 0.88rem;
+    line-height: 1.9; color: #444;
+  }
+  .hero-stats {
+    display: flex; gap: 3rem;
+  }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.5rem; line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.68rem; letter-spacing: 0.1em;
+    color: var(--gray); margin-top: 0.4rem;
+  }
+  .scroll-hint {
+    position: absolute; bottom: 2rem; right: 3rem;
+    font-size: 0.68rem; letter-spacing: 0.2em; color: var(--gray);
+    writing-mode: vertical-rl;
+    opacity: 0; animation: fadeIn 1s 1.2s forwards;
+  }
+
+  /* WORKS */
+  .section-works { padding: 4rem 0; }
+  .section-header {
+    padding: 0 3rem 3rem;
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-title-sm {
+    font-size: 0.68rem; letter-spacing: 0.2em; color: var(--gray);
+  }
+  .work-list { }
+  .work-item {
+    padding: 2rem 3rem;
+    border-bottom: 1px solid var(--line);
+    display: grid; grid-template-columns: auto 1fr auto auto;
+    gap: 3rem; align-items: center;
+    cursor: pointer; transition: background 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .work-item::before {
+    content: ''; position: absolute; left: 0; top: 0;
+    height: 100%; width: 0;
+    background: var(--accent);
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    z-index: 0;
+  }
+  .work-item:hover::before { width: 100%; }
+  .work-item > * { position: relative; z-index: 1; }
+  .work-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 0.85rem; color: var(--gray); width: 2rem;
+  }
+  .work-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 400;
+  }
+  .work-type {
+    font-size: 0.72rem; letter-spacing: 0.1em;
+    color: var(--gray); white-space: nowrap;
+  }
+  .work-year {
+    font-size: 0.72rem; color: var(--gray);
+  }
+
+  /* SKILLS */
+  .section-skills {
+    padding: 6rem 3rem;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6rem;
+    border-top: 1px solid var(--line);
+  }
+  .skills-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem); line-height: 1.2;
+    margin-bottom: 3rem;
+  }
+  .skill-bar-list { display: flex; flex-direction: column; gap: 1.5rem; }
+  .skill-bar-item { }
+  .skill-bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.78rem; margin-bottom: 0.6rem;
+  }
+  .skill-bar-label span:last-child { color: var(--gray); }
+  .skill-track {
+    height: 2px; background: var(--line); position: relative; overflow: hidden;
+  }
+  .skill-fill {
+    height: 100%; background: var(--black);
+    transform-origin: left;
+    animation: growBar 1.2s cubic-bezier(0.4,0,0.2,1) forwards;
+    transform: scaleX(0);
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; }
+  .tag {
+    border: 1px solid var(--line); padding: 0.4rem 1rem;
+    font-size: 0.72rem; border-radius: 99px; letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .tag:hover { background: var(--black); color: var(--white); border-color: var(--black); }
+
+  /* CONTACT */
+  .section-contact {
+    padding: 6rem 3rem;
+    background: var(--black); color: var(--white);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .contact-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.5rem, 5vw, 5rem); line-height: 1.1;
+  }
+  .contact-title em { font-style: italic; color: var(--accent); }
+  .contact-right { text-align: right; }
+  .contact-email {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem; text-decoration: none; color: var(--white);
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 2px; transition: border-color 0.2s;
+  }
+  .contact-email:hover { border-color: var(--accent); color: var(--accent); }
+  .social-links { margin-top: 1.5rem; display: flex; gap: 1.5rem; justify-content: flex-end; }
+  .social-links a {
+    font-size: 0.68rem; letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s;
+  }
+  .social-links a:hover { color: var(--accent); }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes growBar { to { transform: scaleX(1); } }
+
+  @media (max-width: 768px) {
+    header { padding: 1.5rem 1.5rem; }
+    .header-right a:not(.hire-btn) { display: none; }
+    .hero { padding: 10rem 1.5rem 4rem; }
+    .hero-meta { flex-direction: column; gap: 2rem; }
+    .work-item { grid-template-columns: auto 1fr; gap: 1rem; }
+    .work-type, .work-year { display: none; }
+    .section-skills, .section-contact { grid-template-columns: 1fr; gap: 3rem; flex-direction: column; }
+    .section-skills, .section-contact { padding: 4rem 1.5rem; }
+    .section-header, .section-works .work-item { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .contact-right { text-align: left; }
+    .social-links { justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<header>
+  <div class="logo">Lin Wei</div>
+  <div class="header-right">
+    <a href="#works">作品</a>
+    <a href="#skills">技能</a>
+    <a href="#contact" class="hire-btn">联系我</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-tag">
+    <span class="dot"></span>
+    当前：开放合作中
+  </div>
+  <h1>设计师，<br><em>也是</em><br>开发者。</h1>
+  <div class="hero-meta">
+    <p class="hero-desc">
+      我相信好的产品来自对细节的偏执。过去三年，我帮助十余个品牌和个人把想法变成真正能用的东西。
+    </p>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">12+</div>
+        <div class="stat-label">完成项目</div>
+      </div>
+      <div>
+        <div class="stat-num">3yr</div>
+        <div class="stat-label">设计经验</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">SCROLL DOWN</div>
+</section>
+
+<section class="section-works" id="works">
+  <div class="section-header">
+    <span class="section-title-sm">精选作品</span>
+    <span class="section-title-sm">2022 — 2024</span>
+  </div>
+  <div class="work-list">
+    <div class="work-item">
+      <span class="work-num">01</span>
+      <span class="work-name">MORI 咖啡官网</span>
+      <span class="work-type">落地页 · 品牌视觉</span>
+      <span class="work-year">2024</span>
+    </div>
+    <div class="work-item">
+      <span class="work-num">02</span>
+      <span class="work-name">听风播客主页</span>
+      <span class="work-type">Web 设计 · 前端开发</span>
+      <span class="work-year">2024</span>
+    </div>
+    <div class="work-item">
+      <span class="work-num">03</span>
+      <span class="work-name">独立摄影师作品集</span>
+      <span class="work-type">个人品牌 · 作品集</span>
+      <span class="work-year">2023</span>
+    </div>
+    <div class="work-item">
+      <span class="work-num">04</span>
+      <span class="work-name">轻食品牌营销页</span>
+      <span class="work-type">落地页 · 转化优化</span>
+      <span class="work-year">2023</span>
+    </div>
+  </div>
+</section>
+
+<section class="section-skills" id="skills">
+  <div>
+    <h2 class="skills-title">用什么<br>来做这些。</h2>
+    <div class="skill-bar-list">
+      <div class="skill-bar-item">
+        <div class="skill-bar-label"><span>UI / 视觉设计</span><span>精通</span></div>
+        <div class="skill-track"><div class="skill-fill" style="width:90%"></div></div>
+      </div>
+      <div class="skill-bar-item">
+        <div class="skill-bar-label"><span>HTML / CSS</span><span>精通</span></div>
+        <div class="skill-track"><div class="skill-fill" style="width:88%"></div></div>
+      </div>
+      <div class="skill-bar-item">
+        <div class="skill-bar-label"><span>JavaScript</span><span>熟练</span></div>
+        <div class="skill-track"><div class="skill-fill" style="width:72%"></div></div>
+      </div>
+      <div class="skill-bar-item">
+        <div class="skill-bar-label"><span>AI 辅助开发</span><span>精通</span></div>
+        <div class="skill-track"><div class="skill-fill" style="width:95%"></div></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <h2 class="skills-title" style="font-size:1.2rem;margin-bottom:1.5rem;opacity:0.4">工具栈</h2>
+    <div class="tags">
+      <span class="tag">Figma</span>
+      <span class="tag">VS Code</span>
+      <span class="tag">Claude AI</span>
+      <span class="tag">Vercel</span>
+      <span class="tag">GitHub</span>
+      <span class="tag">Tailwind CSS</span>
+      <span class="tag">React</span>
+      <span class="tag">Notion</span>
+    </div>
+  </div>
+</section>
+
+<section class="section-contact" id="contact">
+  <h2 class="contact-title">有想法？<br>来<em>聊聊。</em></h2>
+  <div class="contact-right">
+    <a href="mailto:linwei@example.com" class="contact-email">linwei@example.com</a>
+    <div class="social-links">
+      <a href="#">GitHub</a>
+      <a href="#">微信</a>
+      <a href="#">闲鱼</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX - 5 + 'px';
+    cursor.style.top = e.clientY - 5 + 'px';
+  });
+  document.querySelectorAll('a,button,.work-item,.menu-item').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.style.transform = 'scale(4)');
+    el.addEventListener('mouseleave', () => cursor.style.transform = 'scale(1)');
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VØID — 消失在声音里</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Mulish:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #050508;
+    --white: #f0f0f5;
+    --electric: #7b5cf5;
+    --neon: #a78bfa;
+    --dim: #1a1a24;
+    --muted: #666680;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--void);
+    color: var(--white);
+    font-family: 'Mulish', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* GRAIN */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    padding: 1.8rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .nav-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem; letter-spacing: 0.15em;
+    color: var(--white);
+  }
+  .nav-right { display: flex; gap: 2rem; align-items: center; }
+  .nav-right a {
+    text-decoration: none; color: var(--muted);
+    font-size: 0.72rem; letter-spacing: 0.15em; font-weight: 600;
+    transition: color 0.2s;
+  }
+  .nav-right a:hover { color: var(--white); }
+  .nav-cta {
+    background: var(--electric) !important; color: var(--white) !important;
+    padding: 0.55rem 1.4rem !important;
+    border-radius: 4px !important;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center; position: relative;
+    padding: 8rem 2rem 4rem;
+    overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, var(--electric)22 0%, transparent 70%);
+    pointer-events: none;
+    animation: breathe 4s ease-in-out infinite;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border: 1px solid var(--electric)66;
+    background: var(--electric)11;
+    padding: 0.4rem 1.2rem; border-radius: 99px;
+    font-size: 0.68rem; letter-spacing: 0.2em; font-weight: 600;
+    color: var(--neon); margin-bottom: 2.5rem;
+    opacity: 0; animation: fadeUp 0.8s 0.3s forwards;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 15vw, 14rem);
+    line-height: 0.9; letter-spacing: 0.02em;
+    position: relative; z-index: 1;
+    opacity: 0; animation: fadeUp 0.8s 0.5s forwards;
+  }
+  .hero-title .outline {
+    -webkit-text-stroke: 1px var(--electric);
+    color: transparent;
+  }
+  .hero-sub {
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    color: var(--muted); max-width: 40ch;
+    line-height: 1.8; margin-top: 2rem;
+    opacity: 0; animation: fadeUp 0.8s 0.7s forwards;
+    position: relative; z-index: 1;
+  }
+  .hero-actions {
+    margin-top: 3rem; display: flex; gap: 1rem;
+    opacity: 0; animation: fadeUp 0.8s 0.9s forwards;
+    position: relative; z-index: 1;
+  }
+  .btn-glow {
+    background: var(--electric); color: var(--white);
+    padding: 1rem 2.5rem; border: none; cursor: pointer;
+    font-family: 'Mulish', sans-serif; font-weight: 600;
+    font-size: 0.78rem; letter-spacing: 0.15em;
+    border-radius: 4px;
+    box-shadow: 0 0 30px var(--electric)66;
+    transition: box-shadow 0.3s, transform 0.2s;
+  }
+  .btn-glow:hover {
+    box-shadow: 0 0 60px var(--electric);
+    transform: translateY(-2px);
+  }
+  .btn-ghost {
+    background: transparent; color: var(--white);
+    padding: 1rem 2.5rem; border: 1px solid var(--muted)88;
+    cursor: pointer; font-family: 'Mulish', sans-serif;
+    font-weight: 600; font-size: 0.78rem; letter-spacing: 0.15em;
+    border-radius: 4px; transition: border-color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--white); }
+
+  /* PRODUCT VISUAL */
+  .product-visual {
+    position: relative; z-index: 1; margin: 2rem 0;
+    width: 280px; height: 280px;
+    opacity: 0; animation: fadeUp 1s 0.6s forwards;
+  }
+  .headphone {
+    width: 100%; height: 100%; position: relative;
+  }
+  .hp-arc {
+    position: absolute; top: 10%; left: 15%; right: 15%;
+    height: 60%; border: 8px solid var(--white);
+    border-bottom: none; border-radius: 100px 100px 0 0;
+  }
+  .hp-left, .hp-right {
+    position: absolute; bottom: 5%;
+    width: 22%; height: 44%;
+    background: linear-gradient(135deg, var(--dim), var(--void));
+    border: 1px solid var(--electric)88;
+    border-radius: 12px;
+    box-shadow: 0 0 30px var(--electric)44, inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .hp-left { left: 8%; }
+  .hp-right { right: 8%; }
+  .hp-left::after, .hp-right::after {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 40%; height: 40%;
+    background: var(--electric)44;
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--electric);
+  }
+  .hp-ring {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    border: 1px solid var(--electric)33;
+    border-radius: 50%;
+    animation: ring-expand 3s ease-out infinite;
+  }
+
+  /* SPECS */
+  .section-specs {
+    padding: 6rem 3rem;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--dim); position: relative; z-index: 1;
+    border-top: 1px solid var(--dim);
+    border-bottom: 1px solid var(--dim);
+  }
+  .spec-item {
+    background: var(--void); padding: 3rem 2.5rem;
+    position: relative; overflow: hidden;
+    transition: background 0.3s;
+  }
+  .spec-item:hover { background: var(--dim); }
+  .spec-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem; color: var(--electric);
+    line-height: 1;
+  }
+  .spec-unit {
+    font-size: 1.2rem; color: var(--neon);
+  }
+  .spec-label {
+    font-size: 0.72rem; letter-spacing: 0.2em;
+    color: var(--muted); margin-top: 0.8rem;
+    font-weight: 600;
+  }
+  .spec-desc {
+    font-size: 0.78rem; color: var(--muted);
+    line-height: 1.7; margin-top: 0.5rem;
+  }
+
+  /* FEATURES */
+  .section-features {
+    padding: 8rem 3rem; position: relative; z-index: 1;
+  }
+  .features-header {
+    text-align: center; margin-bottom: 5rem;
+  }
+  .features-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 5rem); letter-spacing: 0.05em;
+  }
+  .features-header p {
+    color: var(--muted); font-size: 0.85rem; margin-top: 1rem;
+    letter-spacing: 0.1em;
+  }
+  .features-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;
+  }
+  .feature-card {
+    background: var(--dim); padding: 2.5rem;
+    border: 1px solid transparent;
+    border-radius: 8px; transition: border-color 0.3s;
+  }
+  .feature-card:hover { border-color: var(--electric)44; }
+  .feature-icon {
+    font-size: 2rem; margin-bottom: 1.2rem;
+  }
+  .feature-name {
+    font-weight: 600; font-size: 1rem;
+    margin-bottom: 0.6rem; letter-spacing: 0.05em;
+  }
+  .feature-desc {
+    font-size: 0.8rem; color: var(--muted); line-height: 1.8;
+  }
+
+  /* CTA */
+  .section-cta {
+    padding: 8rem 3rem;
+    text-align: center; position: relative; z-index: 1;
+    border-top: 1px solid var(--dim);
+  }
+  .cta-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem; letter-spacing: 0.4em;
+    color: var(--muted); margin-bottom: 1rem;
+  }
+  .cta-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 10vw, 9rem);
+    line-height: 1; color: var(--white);
+    margin-bottom: 2rem;
+  }
+  .cta-amount sup { font-size: 0.3em; vertical-align: super; color: var(--neon); }
+  .cta-note {
+    font-size: 0.72rem; color: var(--muted);
+    margin-top: 1.5rem; letter-spacing: 0.1em;
+  }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:none; } }
+  @keyframes breathe { 0%,100%{opacity:0.6;transform:translate(-50%,-55%) scale(1)} 50%{opacity:1;transform:translate(-50%,-55%) scale(1.1)} }
+  @keyframes ring-expand {
+    0% { width:60px; height:60px; opacity:0.6; }
+    100% { width:300px; height:300px; opacity:0; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1.5rem; }
+    .nav-right a:not(.nav-cta) { display: none; }
+    .section-specs { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .section-features, .section-cta, .section-specs { padding: 5rem 1.5rem; }
+    .hero { padding: 7rem 1.5rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">VØID</div>
+  <div class="nav-right">
+    <a href="#specs">规格</a>
+    <a href="#features">功能</a>
+    <a href="#buy" class="nav-cta">立即购买</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge">★ 2024 最佳音频产品</div>
+  <h1 class="hero-title">
+    消失<br>在<span class="outline">声音</span><br>里
+  </h1>
+  <div class="product-visual">
+    <div class="headphone">
+      <div class="hp-arc"></div>
+      <div class="hp-left"></div>
+      <div class="hp-right"></div>
+      <div class="hp-ring" style="width:80px;height:80px;animation-delay:0s"></div>
+      <div class="hp-ring" style="width:80px;height:80px;animation-delay:1s"></div>
+      <div class="hp-ring" style="width:80px;height:80px;animation-delay:2s"></div>
+    </div>
+  </div>
+  <p class="hero-sub">主动降噪。Hi-Fi 音质。40小时续航。<br>专为那些需要一点安静的人。</p>
+  <div class="hero-actions">
+    <button class="btn-glow">立即购买 ¥1,299</button>
+    <button class="btn-ghost">查看详情</button>
+  </div>
+</section>
+
+<section class="section-specs" id="specs">
+  <div class="spec-item">
+    <div class="spec-num">40<span class="spec-unit">h</span></div>
+    <div class="spec-label">续航时间</div>
+    <div class="spec-desc">单次充电续航 40 小时，开启降噪 30 小时。</div>
+  </div>
+  <div class="spec-item">
+    <div class="spec-num">-42<span class="spec-unit">dB</span></div>
+    <div class="spec-label">降噪深度</div>
+    <div class="spec-desc">三级自适应 ANC，城市噪音、飞机引擎均可屏蔽。</div>
+  </div>
+  <div class="spec-item">
+    <div class="spec-num">4<span class="spec-unit">min</span></div>
+    <div class="spec-label">闪充时间</div>
+    <div class="spec-desc">充电 4 分钟，续航 1 小时。来不及等待的人专属。</div>
+  </div>
+</section>
+
+<section class="section-features" id="features">
+  <div class="features-header">
+    <h2>为什么是 VØID</h2>
+    <p>每一个细节都在为你的耳朵服务</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🎵</div>
+      <div class="feature-name">Hi-Fi 旗舰音质</div>
+      <div class="feature-desc">40mm 定制动圈单元，20Hz-40kHz 全频响应，LDAC 高清传输，你听到的就是录音室里的原声。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌙</div>
+      <div class="feature-name">自适应降噪</div>
+      <div class="feature-desc">AI 实时分析环境噪音，三档可调，透传模式一键切换。不想与世界隔绝的时候，也不用摘下耳机。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💎</div>
+      <div class="feature-name">航空级铝镁合金</div>
+      <div class="feature-desc">头梁采用一体成型铝镁合金，耳罩覆以蛋白质皮革，轻至 258g，长时间佩戴无负担。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <div class="feature-name">多设备无缝切换</div>
+      <div class="feature-desc">同时连接两台设备，听歌时来了电话，自动切换，音乐自动暂停。离开了又自动恢复。</div>
+    </div>
+  </div>
+</section>
+
+<section class="section-cta" id="buy">
+  <div class="cta-price">VØID PRO · 旗舰版</div>
+  <div class="cta-amount"><sup>¥</sup>1,299</div>
+  <button class="btn-glow" style="font-size:0.85rem;padding:1.2rem 4rem">加入购物车</button>
+  <p class="cta-note">免费顺丰 · 7天无理由退换 · 12期免息</p>
+</section>
+
+</body>
+</html>

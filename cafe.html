@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MORI CAFÉ — 森之咖啡</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5ede0;
+    --espresso: #2c1a0e;
+    --caramel: #c8874a;
+    --latte: #d4a96a;
+    --fog: #e8ddd0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--cream);
+    color: var(--espresso);
+    font-family: 'Noto Serif SC', serif;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+    mix-blend-mode: multiply;
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; font-weight: 300; letter-spacing: 0.3em;
+    color: var(--espresso);
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    text-decoration: none; color: var(--espresso);
+    font-size: 0.75rem; letter-spacing: 0.2em;
+    opacity: 0.7; transition: opacity 0.3s;
+  }
+  .nav-links a:hover { opacity: 1; }
+
+  /* HERO */
+  .hero {
+    height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    position: relative; overflow: hidden;
+  }
+  .hero-left {
+    display: flex; flex-direction: column;
+    justify-content: flex-end; padding: 6rem 4rem;
+    position: relative; z-index: 2;
+  }
+  .hero-eyebrow {
+    font-size: 0.7rem; letter-spacing: 0.4em;
+    color: var(--caramel); margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 1s 0.3s forwards;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    font-weight: 300; line-height: 1.05;
+    margin-bottom: 2rem;
+    opacity: 0; animation: fadeUp 1s 0.5s forwards;
+  }
+  .hero-title em { font-style: italic; color: var(--caramel); }
+  .hero-desc {
+    font-size: 0.85rem; line-height: 2;
+    color: var(--espresso); opacity: 0;
+    max-width: 28ch;
+    animation: fadeUp 1s 0.7s forwards;
+  }
+  .hero-cta {
+    margin-top: 3rem;
+    opacity: 0; animation: fadeUp 1s 0.9s forwards;
+    display: flex; gap: 1.5rem; align-items: center;
+  }
+  .btn-primary {
+    background: var(--espresso); color: var(--cream);
+    padding: 0.9rem 2.5rem; font-size: 0.75rem;
+    letter-spacing: 0.2em; border: none; cursor: pointer;
+    font-family: 'Noto Serif SC', serif;
+    transition: background 0.3s;
+  }
+  .btn-primary:hover { background: var(--caramel); }
+  .btn-secondary {
+    font-size: 0.75rem; letter-spacing: 0.2em;
+    color: var(--espresso); opacity: 0.6;
+    text-decoration: none; border-bottom: 1px solid currentColor;
+    padding-bottom: 2px; transition: opacity 0.3s;
+  }
+  .btn-secondary:hover { opacity: 1; }
+
+  .hero-right {
+    position: relative; overflow: hidden;
+  }
+  .hero-img-wrap {
+    position: absolute; inset: 0;
+    opacity: 0; animation: fadeIn 1.5s 0.2s forwards;
+  }
+  .hero-bg {
+    width: 100%; height: 100%;
+    background:
+      radial-gradient(ellipse at 30% 40%, #c8874a33 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 70%, #2c1a0e22 0%, transparent 50%),
+      linear-gradient(135deg, #d4a96a 0%, #8b5e3c 50%, #2c1a0e 100%);
+  }
+  .hero-circle {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 55%; aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #f0c890, #8b4513);
+    box-shadow: 0 30px 80px #2c1a0e55, inset 0 -20px 40px #2c1a0e44;
+    animation: float 6s ease-in-out infinite;
+  }
+  .hero-circle::after {
+    content: '';
+    position: absolute; top: 12%; left: 18%;
+    width: 30%; height: 20%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.4), transparent);
+    border-radius: 50%; transform: rotate(-30deg);
+  }
+  .steam {
+    position: absolute; bottom: 28%; left: 50%;
+    transform: translateX(-50%);
+  }
+  .steam span {
+    display: inline-block; width: 3px;
+    background: linear-gradient(to top, var(--cream)88, transparent);
+    border-radius: 2px; margin: 0 6px;
+    animation: rise 2s ease-in-out infinite;
+  }
+  .steam span:nth-child(1) { height: 30px; animation-delay: 0s; }
+  .steam span:nth-child(2) { height: 45px; animation-delay: 0.4s; }
+  .steam span:nth-child(3) { height: 25px; animation-delay: 0.8s; }
+
+  .hero-num {
+    position: absolute; bottom: 3rem; right: 3rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 8rem; font-weight: 300;
+    color: var(--cream); opacity: 0.08;
+    line-height: 1; pointer-events: none;
+  }
+
+  /* SECTION: MENU PREVIEW */
+  .section-menu {
+    padding: 8rem 4rem;
+    display: grid; grid-template-columns: 1fr 2fr; gap: 6rem;
+    align-items: start;
+  }
+  .section-label {
+    font-size: 0.65rem; letter-spacing: 0.5em;
+    color: var(--caramel); margin-bottom: 1rem;
+    writing-mode: vertical-rl; transform: rotate(180deg);
+    height: fit-content;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 300; line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+  .menu-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: var(--espresso); border: 1px solid var(--espresso);
+  }
+  .menu-item {
+    background: var(--cream); padding: 2rem;
+    transition: background 0.3s; cursor: pointer;
+    position: relative; overflow: hidden;
+  }
+  .menu-item::after {
+    content: ''; position: absolute; inset: 0;
+    background: var(--espresso); transform: translateY(101%);
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .menu-item:hover::after { transform: translateY(0); }
+  .menu-item:hover .item-name,
+  .menu-item:hover .item-price,
+  .menu-item:hover .item-desc { color: var(--cream); position: relative; z-index: 1; }
+  .item-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem; font-weight: 400;
+    margin-bottom: 0.4rem; transition: color 0.3s;
+    position: relative; z-index: 1;
+  }
+  .item-desc {
+    font-size: 0.72rem; opacity: 0.6; line-height: 1.7;
+    transition: color 0.3s; position: relative; z-index: 1;
+  }
+  .item-price {
+    margin-top: 1rem; font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem; color: var(--caramel);
+    transition: color 0.3s; position: relative; z-index: 1;
+  }
+
+  /* SECTION: STORY */
+  .section-story {
+    padding: 6rem 4rem;
+    background: var(--espresso); color: var(--cream);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6rem;
+    align-items: center;
+  }
+  .story-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 300; font-style: italic;
+    line-height: 1.5;
+    border-left: 2px solid var(--caramel); padding-left: 2rem;
+  }
+  .story-text {
+    font-size: 0.82rem; line-height: 2.2;
+    opacity: 0.7;
+  }
+  .story-text p + p { margin-top: 1.2rem; }
+
+  /* SECTION: HOURS */
+  .section-hours {
+    padding: 6rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--espresso);
+  }
+  .hours-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem; font-weight: 300;
+  }
+  .hours-list { list-style: none; }
+  .hours-list li {
+    display: flex; gap: 3rem; align-items: baseline;
+    padding: 0.8rem 0; border-bottom: 1px solid var(--fog);
+    font-size: 0.82rem;
+  }
+  .hours-list .day { width: 6rem; opacity: 0.5; }
+  .hours-list .time { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem; font-weight: 300; letter-spacing: 0.3em;
+  }
+  .footer-addr { font-size: 0.72rem; opacity: 0.4; letter-spacing: 0.1em; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+  @keyframes float {
+    0%,100% { transform: translate(-50%,-50%) translateY(0); }
+    50% { transform: translate(-50%,-50%) translateY(-12px); }
+  }
+  @keyframes rise {
+    0% { transform: translateY(0) scaleX(1); opacity: 0.8; }
+    100% { transform: translateY(-40px) scaleX(0.3); opacity: 0; }
+  }
+
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 8rem 2rem 4rem; }
+    nav { padding: 1.5rem 2rem; }
+    .nav-links { display: none; }
+    .section-menu, .section-story { grid-template-columns: 1fr; gap: 3rem; }
+    .section-menu, .section-story, .section-hours { padding: 5rem 2rem; }
+    .section-label { writing-mode: initial; transform: none; }
+    .section-hours { flex-direction: column; gap: 3rem; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">MORI CAFÉ</div>
+  <ul class="nav-links">
+    <li><a href="#menu">菜单</a></li>
+    <li><a href="#story">故事</a></li>
+    <li><a href="#hours">时间</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-left">
+    <p class="hero-eyebrow">SINCE 2019 · 杭州西湖区</p>
+    <h1 class="hero-title">慢下来，<br>让<em>咖啡</em><br>先说话。</h1>
+    <p class="hero-desc">每一杯都是一次对话。我们相信好咖啡不需要太多解释，只需要一个安静的下午。</p>
+    <div class="hero-cta">
+      <button class="btn-primary">查看菜单</button>
+      <a href="#story" class="btn-secondary">关于我们</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-img-wrap">
+      <div class="hero-bg"></div>
+      <div class="hero-circle"></div>
+      <div class="steam">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="hero-num">01</div>
+  </div>
+</section>
+
+<section class="section-menu" id="menu">
+  <div>
+    <p class="section-label">MENU</p>
+  </div>
+  <div>
+    <h2 class="section-title">今日<br>精选</h2>
+    <div class="menu-grid">
+      <div class="menu-item">
+        <div class="item-name">手冲耶加雪菲</div>
+        <div class="item-desc">花香 · 柠檬酸质 · 轻盈</div>
+        <div class="item-price">¥38</div>
+      </div>
+      <div class="menu-item">
+        <div class="item-name">拿铁 Latte</div>
+        <div class="item-desc">意式浓缩 · 全脂牛奶 · 绵密奶泡</div>
+        <div class="item-price">¥32</div>
+      </div>
+      <div class="menu-item">
+        <div class="item-name">森之招牌冷萃</div>
+        <div class="item-desc">18小时低温萃取 · 冷冽甘甜</div>
+        <div class="item-price">¥42</div>
+      </div>
+      <div class="menu-item">
+        <div class="item-name">抹茶拿铁</div>
+        <div class="item-desc">宇治抹茶 · 燕麦奶可选</div>
+        <div class="item-price">¥35</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-story" id="story">
+  <blockquote class="story-quote">
+    "一杯好咖啡，<br>是一个人<br>给另一个人的<br>最小礼物。"
+  </blockquote>
+  <div class="story-text">
+    <p>2019年，我们在西湖边的一条安静小巷里开了这家店。没有网红打卡的喧嚣，只有一台老式La Marzocco和一扇面对竹林的窗。</p>
+    <p>我们只做一件事：让你在这里喝到一杯值得被记住的咖啡。</p>
+    <p>所有的豆子都经过我们亲自杯测，所有的手冲都由驻店咖啡师完成。慢，是我们唯一的速度。</p>
+  </div>
+</section>
+
+<section class="section-hours" id="hours">
+  <h2 class="hours-title">营业<br>时间</h2>
+  <ul class="hours-list">
+    <li><span class="day">周一至周五</span><span class="time">09:00 — 21:00</span></li>
+    <li><span class="day">周六</span><span class="time">08:00 — 22:00</span></li>
+    <li><span class="day">周日</span><span class="time">08:00 — 20:00</span></li>
+  </ul>
+  <div>
+    <p style="font-size:0.72rem;opacity:0.4;letter-spacing:0.1em;line-height:2">
+      杭州市西湖区文三路88号<br>
+      📞 0571-8888-0000
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">MORI CAFÉ</div>
+  <div class="footer-addr">杭州 · 西湖 · 2019</div>
+</footer>
+
+</body>
+</html>
