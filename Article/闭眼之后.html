@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>闭眼之后</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=ZCOOL+XiaoWei&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --text: #d4d0c8;
+    --text-dim: #7a7670;
+    --accent: #c45d3e;
+    --accent-glow: rgba(196, 93, 62, 0.15);
+    --divider: #1e1c1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif SC', serif;
+    line-height: 2;
+    font-size: 17px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 60px 28px 100px;
+  }
+
+  .header {
+    margin-bottom: 56px;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -28px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .title {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 36px;
+    color: #f0ece4;
+    letter-spacing: 6px;
+    margin-bottom: 16px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  .section {
+    margin-bottom: 48px;
+  }
+
+  .section-number {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    font-family: 'ZCOOL XiaoWei', serif;
+  }
+
+  p {
+    margin-bottom: 24px;
+    text-align: justify;
+  }
+
+  .highlight {
+    color: #f0ece4;
+    font-weight: 700;
+  }
+
+  .pull-quote {
+    border-left: 2px solid var(--accent);
+    padding: 16px 0 16px 24px;
+    margin: 36px 0;
+    font-size: 19px;
+    color: #f0ece4;
+    line-height: 1.9;
+    background: linear-gradient(90deg, var(--accent-glow), transparent 70%);
+  }
+
+  .scene {
+    background: #111;
+    border-radius: 2px;
+    padding: 28px 24px;
+    margin: 32px 0;
+    border: 1px solid var(--divider);
+  }
+
+  .scene p {
+    color: #b8b4aa;
+    font-size: 16px;
+    line-height: 2.1;
+  }
+
+  .scene p:last-child {
+    margin-bottom: 0;
+  }
+
+  .time-seq {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0;
+    flex-wrap: wrap;
+  }
+
+  .time-seq span {
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 4px 12px;
+    border: 1px solid #2a2826;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .time-seq .arrow {
+    border: none;
+    padding: 0;
+    color: var(--accent);
+    font-size: 11px;
+  }
+
+  .ending {
+    margin-top: 64px;
+    padding-top: 40px;
+    border-top: 1px solid var(--divider);
+  }
+
+  .ending p {
+    color: var(--text-dim);
+    font-size: 15px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    color: var(--accent);
+    border: 1px solid rgba(196, 93, 62, 0.3);
+    padding: 3px 10px;
+    border-radius: 2px;
+    margin-right: 8px;
+    margin-top: 20px;
+    letter-spacing: 1px;
+  }
+
+  .draft-note {
+    margin-top: 80px;
+    padding: 24px;
+    background: #0f0e0d;
+    border: 1px dashed #2a2826;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 2;
+  }
+
+  .draft-note strong {
+    color: var(--accent);
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="title">闭眼之后</div>
+    <div class="subtitle">人性 × 客观规律 · 第一篇</div>
+  </div>
+
+  <!-- 第一段：场景 -->
+  <div class="section">
+    <div class="section-number">01 — 那个夜晚</div>
+
+    <p>不记得几点了。可能十一点，可能一点，不重要。重要的是，我终于把手机放下了——不是因为自律，是因为<span class="highlight">眼睛实在睁不开了</span>。</p>
+
+    <p>王者打完最后一局。原神刷完了树脂。动漫追到最新一集。该刷的都刷完了。身体说够了，大脑才勉强同意关机。</p>
+
+    <p>闭上眼。</p>
+
+    <p>然后真正的夜晚才开始。</p>
+  </div>
+
+  <!-- 第二段：脑内三层 -->
+  <div class="section">
+    <div class="section-number">02 — 三秒，三层</div>
+
+    <p>闭眼不到几分钟，念头涌上来了。不是一个，是一串，像弹幕一样从脑子里飘过。</p>
+
+    <div class="scene">
+      <p>刚才那局王者，我选元歌是不是就赢了？</p>
+      <p>有人说玛奇玛最后被做成了炒肉……后面的剧情到底怎么走？</p>
+      <p>如果我那时候能留住她，现在是不是还在聊天，还沉在爱河里？</p>
+    </div>
+
+    <p>这三个念头，你觉得它们是随机的。</p>
+    <p>它们不是。</p>
+
+    <p>第一个，是对<span class="highlight">刚才</span>的反刍。最安全的那层。一局游戏而已，想错了也不疼。</p>
+    <p>第二个，是对<span class="highlight">虚构世界</span>的期待。你在期待一个动漫角色的命运——因为你不敢期待自己的。</p>
+    <p>第三个，才是<span class="highlight">真实的痛</span>。一个人，一段没留住的关系，一个你反复修改剧本却无法重来的现实。</p>
+
+    <div class="pull-quote">大脑很聪明。它把你的痛苦排好了队——由浅到深，一层一层地放给你看。像一个体贴的酷刑师，先给你热身。</div>
+  </div>
+
+  <!-- 第三段：第二天 -->
+  <div class="section">
+    <div class="section-number">03 — 第二天早上</div>
+
+    <p>醒了。第一个动作是什么？</p>
+
+    <p><span class="highlight">拿起手机。</span></p>
+
+    <p>不刷牙。不洗脸。不吃饭。眼睛还没完全睁开，手指已经解锁了屏幕。</p>
+
+    <p>王者。原神。动漫。短视频。</p>
+
+    <p>你知道自己在做什么吗？你在做一件非常精密的事——</p>
+
+    <div class="pull-quote">你在把自己重新塞回最浅的那一层。<br>因为昨晚你不小心沉到了最深处，那里太疼了。所以今天一睁眼，你要用最快的速度游回水面，假装什么都没发生。</div>
+
+    <p>游戏不是娱乐。动漫不是爱好。</p>
+    <p>它们是<span class="highlight">麻醉剂</span>——你用来把自己从第三层拉回第一层的工具。</p>
+  </div>
+
+  <!-- 第四段：闭环 -->
+  <div class="section">
+    <div class="section-number">04 — 闭环</div>
+
+    <p>于是一天就这样开始了。和昨天一样。和前天一样。和上个月的某一天一样。</p>
+
+    <p>睡眠开始漂移：</p>
+
+    <div class="time-seq">
+      <span>10点</span><span class="arrow">→</span>
+      <span>11点</span><span class="arrow">→</span>
+      <span>12点</span><span class="arrow">→</span>
+      <span>凌晨1点</span><span class="arrow">→</span>
+      <span>凌晨3点</span><span class="arrow">→</span>
+      <span>清晨8点入睡</span>
+    </div>
+
+    <p>状态开始下坠。情绪开始发酸。身体开始报警。</p>
+
+    <p>然后某一天深夜，你又躺在那张床上，固定的时间，固定的位置，开始"深思"——</p>
+
+    <div class="scene">
+      <p>为什么我的命是这样？——老天没有眼。</p>
+      <p>为什么我不是富二代？——家里人都是废物。</p>
+      <p>为什么没人来爱我？——她们眼瞎。</p>
+      <p>总结：我过得不好，是世界的错。</p>
+    </div>
+
+    <p>你看出来了吗？</p>
+
+    <p>这不是"深思"。这是<span class="highlight">大脑在给你写免责声明</span>。</p>
+
+    <p>它在告诉你：不是你的问题。你可以继续躺着。明天还是这样过。</p>
+
+    <p>签字吧。</p>
+
+    <p>你签了。</p>
+
+    <p>每一天你都签了。</p>
+  </div>
+
+  <!-- 第五段：规律 -->
+  <div class="section">
+    <div class="section-number">05 — 规律不骂人，但规律不等人</div>
+
+    <p>熬夜会垮。这不是观点，是生物学。</p>
+    <p>惯性会吞人。这不是鸡汤，是热力学。</p>
+    <p>自欺会让你身边空无一人。这不是惩罚，是<span class="highlight">因果</span>。</p>
+
+    <p>规律不会冲你喊"你醒醒"。它不骂人。它只是在你不看它的时候，安静地执行。</p>
+
+    <p>等你终于抬头，发现身边空了，时间过了，身体坏了。然后你说——</p>
+
+    <p>"全他妈你们的错。"</p>
+
+    <div class="pull-quote">人不是死于一个巨大的错误。<br>人是死于一万个"今天就算了"。</div>
+  </div>
+
+  <!-- 第六段：真正的问题 -->
+  <div class="section">
+    <div class="section-number">06 — 真正的问题</div>
+
+    <p>你可能以为这篇文章是在骂人。不是。</p>
+
+    <p>我写的那个人，是我自己。</p>
+
+    <p>那个夜晚是我的夜晚。那个闭环是我的闭环。那个签字的人，是我。</p>
+
+    <p>我现在没有资格站在高处教你"怎样走出来"。因为走出来不是一个动作，它不像翻个身那么干脆。它更像——你在泥里，先把一只手伸出来，然后另一只，然后发现脚还陷着，然后你又沉回去一点，然后再伸手。</p>
+
+    <p>反复的。缓慢的。不英雄的。</p>
+
+    <p>但有一件事我现在看清楚了：</p>
+
+    <div class="pull-quote">让我困住的，不是游戏，不是熬夜，不是那个没留住的人。<br><br>是我以为自己懂了，但其实我只是给自己的不动找了一套说辞。</div>
+
+    <p>那套说辞很完整。逻辑自洽。甚至有一点悲壮感。</p>
+
+    <p>但它是假的。</p>
+
+    <p>因为真正懂了的人，会动。</p>
+    <p>哪怕只是一点点。</p>
+  </div>
+
+  <!-- 结尾 -->
+  <div class="ending">
+    <p>如果你今晚躺在床上，闭上眼，脑子里也飘过了那三层——</p>
+    <p>我没有什么建议给你。</p>
+    <p>我只想告诉你：<span class="highlight" style="color: var(--accent);">你不是一个人在签那份免责声明。</span></p>
+    <p>但它确实是假的。</p>
+    <p style="margin-top: 36px; color: var(--text-dim); font-size: 14px;">你可以不签。</p>
+
+    <div style="margin-top: 32px;">
+      <span class="tag"># 人性与规律</span>
+      <span class="tag"># 自我欺骗</span>
+      <span class="tag"># 深夜的你</span>
+      <span class="tag"># 成长</span>
+    </div>
+  </div>
+
+  <!-- 给作者的备注 -->
+  <div class="draft-note">
+    <strong>[ 给你的备注，不是文章的一部分 ]</strong><br><br>
+    这是初稿。你需要做的事：<br><br>
+    1. <strong>检查「元歌」「玛奇玛」「王者」「原神」</strong>这些细节——是保留还是换掉？保留的好处是真实、有辨识度；换掉的好处是让更多人代入。你选。<br><br>
+    2. <strong>第六段「我写的那个人是我自己」</strong>——这句话是这篇文章的核弹。如果你觉得太暴露，可以软化。但我建议你留着。因为读者在前五段会以为你在骂他，到第六段突然发现你在讲自己，这个转折会让他心里一震。<br><br>
+    3. <strong>结尾故意没有给"方法论"</strong>。小红书上太多文章在结尾塞三个步骤五个建议。你不要。你的病灶是"人性与规律"，不是"人生教练"。这篇文章的任务只有一个：<strong>让人看见自己</strong>。看见之后的事，留给下一篇。<br><br>
+    4. <strong>关于那个人（"她"）</strong>——你提了一句，我没有展开。如果你愿意，第二篇可以围绕这个写。但第一篇不要贪。<br><br>
+    5. 标题「闭眼之后」可以换。备选：「签字」「三层」「今天就算了」。你挑一个最扎你的。
+  </div>
+
+</div>
+</body>
+</html>
