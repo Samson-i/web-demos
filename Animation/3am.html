@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>03:00 — 凌晨三点</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Noto+Serif+SC:wght@300;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --night:    #0a0e1a;   /* 深夜底色，蓝黑 */
+    --ink:      #050810;   /* 更深的角落 */
+    --amber:    #f4a261;   /* 台灯暖橘 */
+    --amber-d:  #c47a3e;   /* 暗橘 */
+    --screen:   #6ba3c5;   /* 手机屏幕冷蓝 */
+    --bone:     #d4cfc4;   /* 米白文字 */
+    --muted:    #5a6478;   /* 灰蓝（次要文字）*/
+    --line:     #1a2030;   /* 分隔线 */
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body {
+    width:100%; height:100%;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Noto Serif SC', serif;
+    color: var(--bone);
+  }
+  body { display:flex; align-items:center; justify-content:center; }
+
+  /* 噪点滤镜，营造胶片+夜色质感 */
+  body::after {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:200;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity:0.5; mix-blend-mode:overlay;
+  }
+
+  /* 暗角效果，强化夜晚感 */
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:199;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+  }
+
+  /* 16:9 舞台 */
+  .stage {
+    position:relative;
+    width: 100vw;
+    height: 56.25vw;
+    max-height: 100vh;
+    max-width: 177.78vh;
+    background: var(--night);
+    overflow:hidden;
+    --u: calc(min(100vw, 177.78vh) / 100);
+  }
+
+  .shot { position:absolute; inset:0; display:none; overflow:hidden; }
+  .shot.on { display:block; }
+  .center {
+    position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+  }
+
+  /* 全局元素：呼吸的光点（贯穿全片） */
+  .breath {
+    position:absolute;
+    top: calc(var(--u) * 4);
+    right: calc(var(--u) * 4);
+    width: calc(var(--u) * 0.6);
+    height: calc(var(--u) * 0.6);
+    border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 calc(var(--u) * 1.5) var(--amber);
+    z-index: 100;
+    opacity: 0;
+  }
+
+  /* 角标 */
+  .timestamp {
+    position:absolute;
+    bottom: calc(var(--u) * 3);
+    left: calc(var(--u) * 4);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: calc(var(--u) * 0.9);
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    z-index: 100;
+    opacity: 0;
+  }
+
+  .ctx-label {
+    position:absolute;
+    top: calc(var(--u) * 3);
+    left: calc(var(--u) * 4);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: calc(var(--u) * 0.8);
+    color: var(--muted);
+    letter-spacing: 0.3em;
+    z-index: 100;
+    opacity: 0;
+  }
+
+  /* ============ S1: 开场 黑屏 + 一束光 ============ */
+  #s1 .light-source {
+    position:absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(var(--u) * 12);
+    height: calc(var(--u) * 12);
+    background: radial-gradient(circle, var(--amber) 0%, transparent 60%);
+    opacity: 0;
+    border-radius: 50%;
+    filter: blur(calc(var(--u) * 0.5));
+  }
+
+  /* ============ S2: 时间码 02:59 → 03:00 ============ */
+  #s2 .clock {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: calc(var(--u) * 14);
+    font-weight: 300;
+    color: var(--bone);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-shadow: 0 0 calc(var(--u) * 2) rgba(244, 162, 97, 0.15);
+  }
+  #s2 .clock .digit { display:inline-block; }
+  #s2 .clock .colon {
+    display:inline-block;
+    color: var(--amber);
+    opacity: 0.8;
+  }
+  #s2 .clock-label {
+    position:absolute;
+    top: calc(50% + var(--u) * 9);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: calc(var(--u) * 0.9);
+    color: var(--muted);
+    letter-spacing: 0.6em;
+    opacity: 0;
+  }
+
+  /* ============ S3: 提示语 ============ */
+  #s3 .prompt {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 3.5);
+    color: var(--bone);
+    letter-spacing: 0.15em;
+    line-height: 1.6;
+  }
+  #s3 .prompt .em {
+    color: var(--amber);
+    font-weight: 500;
+  }
+  #s3 .prompt .ch { display:inline-block; opacity:0; }
+
+  /* ============ S4: 醒着的人们（窗户灯光） ============ */
+  #s4 .city {
+    position:absolute;
+    inset: 0;
+  }
+  #s4 .window {
+    position:absolute;
+    background: var(--amber);
+    box-shadow: 0 0 calc(var(--u) * 0.8) rgba(244, 162, 97, 0.5);
+    opacity: 0;
+  }
+  #s4 .city-label {
+    position:absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 2.4);
+    color: var(--bone);
+    letter-spacing: 0.3em;
+    text-align: center;
+    opacity: 0;
+    text-shadow: 0 0 calc(var(--u) * 1) rgba(10, 14, 26, 0.8);
+  }
+  #s4 .city-sub {
+    position:absolute;
+    top: calc(50% + var(--u) * 4);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: calc(var(--u) * 0.9);
+    color: var(--muted);
+    letter-spacing: 0.4em;
+    text-align: center;
+    opacity: 0;
+  }
+
+  /* ============ S5: 打字机代码注释 ============ */
+  #s5 {
+    background: var(--night);
+  }
+  #s5 .code-block {
+    position:absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: calc(var(--u) * 1.4);
+    line-height: 1.9;
+    color: var(--muted);
+    width: calc(var(--u) * 70);
+  }
+  #s5 .code-block .line { white-space: pre; }
+  #s5 .code-block .comment { color: var(--amber-d); }
+  #s5 .code-block .keyword { color: var(--screen); }
+  #s5 .code-block .string  { color: var(--bone); }
+  #s5 .code-block .cursor {
+    display:inline-block;
+    width: calc(var(--u) * 0.8);
+    height: calc(var(--u) * 1.5);
+    background: var(--amber);
+    vertical-align: middle;
+    margin-left: 2px;
+    animation: blink 1s steps(2) infinite;
+  }
+  @keyframes blink {
+    0%, 50% { opacity:1; }
+    51%, 100% { opacity:0; }
+  }
+
+  /* ============ S6: 列举 ============ */
+  #s6 .list-wrap {
+    position:absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: left;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 2.2);
+    line-height: 2;
+    color: var(--bone);
+    letter-spacing: 0.1em;
+  }
+  #s6 .list-item {
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--u) * 1.5);
+  }
+  #s6 .list-item .dot {
+    width: calc(var(--u) * 0.4);
+    height: calc(var(--u) * 0.4);
+    background: var(--amber);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  #s6 .list-item .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: calc(var(--u) * 0.85);
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    margin-left: calc(var(--u) * 1);
+  }
+
+  /* ============ S7: 转折 ============ */
+  #s7 .turn-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: calc(var(--u) * 4);
+    font-weight: 300;
+    color: var(--bone);
+    letter-spacing: 0.2em;
+    text-align: center;
+    line-height: 1.6;
+  }
+  #s7 .turn-text .line1 { display:block; opacity:0; }
+  #s7 .turn-text .line2 { display:block; opacity:0; }
+  #s7 .turn-text .em {
+    color: var(--amber);
+    font-weight: 500;
+  }
+  #s7 .strikethrough {
+    position: relative;
+    display: inline-block;
+  }
+  #s7 .strikethrough::after {
+    content: '';
+    position:absolute;
+    top: 50%; left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--muted);
+    transform: translateY(-50%);
+  }
+
+  /* ============ S8: 收尾 ============ */
+  #s8 .end-text {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 300;
+    font-size: calc(var(--u) * 3);
+    color: var(--bone);
+    letter-spacing: 0.25em;
+    text-align: center;
+    line-height: 1.6;
+    opacity: 0;
+  }
+  #s8 .end-text .em {
+    color: var(--amber);
+    font-weight: 500;
+  }
+  #s8 .end-dot {
+    display: block;
+    width: calc(var(--u) * 0.6);
+    height: calc(var(--u) * 0.6);
+    background: var(--amber);
+    border-radius: 50%;
+    margin: calc(var(--u) * 3) auto 0;
+    box-shadow: 0 0 calc(var(--u) * 2) var(--amber);
+    opacity: 0;
+  }
+  #s8 .signature {
+    position:absolute;
+    bottom: calc(var(--u) * 4);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: calc(var(--u) * 0.8);
+    color: var(--muted);
+    letter-spacing: 0.5em;
+    opacity: 0;
+  }
+
+  /* ============ 开始按钮 ============ */
+  .start-btn {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: transparent;
+    color: var(--bone);
+    border: 1px solid var(--amber);
+    padding: calc(var(--u) * 1.5) calc(var(--u) * 4);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: calc(var(--u) * 1);
+    letter-spacing: 0.4em;
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s;
+  }
+  .start-btn:hover {
+    background: var(--amber);
+    color: var(--night);
+  }
+  .start-btn.hidden { display:none; }
+
+  /* ============ 控制条 ============ */
+  .controls {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 500;
+    display: none;
+    gap: 10px;
+    background: rgba(5, 8, 16, 0.9);
+    padding: 10px 16px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--bone);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    align-items: center;
+  }
+  .controls button {
+    background: transparent;
+    color: var(--bone);
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    font-family: inherit; font-size: 11px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+  }
+  .controls button:hover {
+    background: var(--amber);
+    color: var(--night);
+    border-color: var(--amber);
+  }
+  .scrubber {
+    width: 300px;
+    -webkit-appearance: none; appearance: none;
+    height: 2px; background: var(--line); outline: none;
+    cursor: pointer;
+  }
+  .scrubber::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 12px; height: 12px;
+    background: var(--amber); border-radius: 50%;
+    cursor: pointer;
+  }
+  .scrubber::-moz-range-thumb {
+    width: 12px; height: 12px;
+    background: var(--amber); border-radius: 50%;
+    cursor: pointer; border: none;
+  }
+  .controls .tc {
+    color: var(--muted);
+    min-width: 90px;
+  }
+  .audio-hint {
+    position: fixed;
+    top: 20px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    z-index: 500;
+    opacity: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- 贯穿全片的呼吸光点 -->
+  <div class="breath" id="breath"></div>
+  <div class="timestamp" id="tc">03:00:00</div>
+  <div class="ctx-label" id="ctx">// AWAKE</div>
+
+  <!-- S1: 开场 -->
+  <div class="shot" id="s1">
+    <div class="light-source" id="s1light"></div>
+  </div>
+
+  <!-- S2: 时间码翻转 -->
+  <div class="shot" id="s2">
+    <div class="center">
+      <div class="clock" id="s2clock">
+        <span class="digit" id="s2h">02</span><span class="colon">:</span><span class="digit" id="s2m">59</span>
+      </div>
+    </div>
+    <div class="clock-label" id="s2label">凌 晨</div>
+  </div>
+
+  <!-- S3: 提示语 -->
+  <div class="shot" id="s3">
+    <div class="center">
+      <div class="prompt" id="s3text"></div>
+    </div>
+  </div>
+
+  <!-- S4: 城市窗户 -->
+  <div class="shot" id="s4">
+    <div class="city" id="s4city"></div>
+    <div class="city-label" id="s4label">这座城市里<br>有 <span style="color:var(--amber)">7,432</span> 个窗户<br>还亮着</div>
+    <div class="city-sub" id="s4sub">// REAL-TIME ESTIMATE</div>
+  </div>
+
+  <!-- S5: 代码注释 -->
+  <div class="shot" id="s5">
+    <div class="code-block" id="s5code">
+      <div class="line"><span class="comment">// 凌晨三点，</span></div>
+      <div class="line"><span class="comment">// 你不是在熬夜，</span></div>
+      <div class="line"><span class="comment">// 你只是在</span><span class="string">"和自己独处"</span><span class="comment">。</span><span class="cursor"></span></div>
+    </div>
+  </div>
+
+  <!-- S6: 醒着的人列表 -->
+  <div class="shot" id="s6">
+    <div class="list-wrap" id="s6list">
+      <div class="list-item"><span class="dot"></span>写代码的人<span class="meta">// debugging life</span></div>
+      <div class="list-item"><span class="dot"></span>失眠的人<span class="meta">// counting sheep</span></div>
+      <div class="list-item"><span class="dot"></span>刚下班的人<span class="meta">// just got home</span></div>
+      <div class="list-item"><span class="dot"></span>哭过又笑了的人<span class="meta">// healing</span></div>
+      <div class="list-item"><span class="dot"></span>正在做梦的人<span class="meta">// rendering...</span></div>
+      <div class="list-item"><span class="dot"></span><span style="color:var(--amber)">还有你</span><span class="meta">// you are here</span></div>
+    </div>
+  </div>
+
+  <!-- S7: 转折 -->
+  <div class="shot" id="s7">
+    <div class="center">
+      <div class="turn-text">
+        <span class="line1">你以为你<span class="strikethrough" id="s7strike">孤独</span></span>
+        <span class="line2">其实你只是<span class="em">诚实</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- S8: 收尾 -->
+  <div class="shot" id="s8">
+    <div class="center">
+      <div class="end-text" id="s8end">
+        晚 安 ，<br>还 醒 着 的 <span class="em">你</span>
+      </div>
+      <div class="end-dot" id="s8dot"></div>
+    </div>
+    <div class="signature" id="s8sig">— 03:00 —</div>
+  </div>
+
+</div>
+
+<button class="start-btn" id="startBtn">▸ START</button>
+<div class="audio-hint" id="audioHint">♪ AUDIO ON</div>
+
+<div class="controls" id="controls">
+  <button id="ctrlPlay">⏸</button>
+  <button id="ctrlRestart">⟲</button>
+  <input type="range" class="scrubber" id="scrub" min="0" max="35" step="0.1" value="0">
+  <span class="tc" id="ctrlTc">00:00 / 00:35</span>
+</div>
+
+<script>
+// ====================== Web Audio: 自制音效 ======================
+let audioCtx = null;
+let masterGain = null;
+let ambientPlaying = false;
+let ambientNodes = [];
+
+function initAudio(){
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.4;
+  masterGain.connect(audioCtx.destination);
+}
+
+// 持续的低频氛围嗡鸣（贯穿全片）
+function startAmbient(){
+  if (ambientPlaying) return;
+  ambientPlaying = true;
+
+  // 两个略微失谐的低频正弦波，制造"夜晚的呼吸"
+  [55, 55.5, 82.5].forEach((freq, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = 0;
+    gain.gain.linearRampToValueAtTime(0.08 - i*0.02, audioCtx.currentTime + 2);
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start();
+    ambientNodes.push({osc, gain});
+  });
+
+  // 一点高频"咝咝"声（像老电视的本底噪声）
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) output[i] = (Math.random() * 2 - 1) * 0.5;
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'highpass';
+  noiseFilter.frequency.value = 3000;
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.value = 0;
+  noiseGain.gain.linearRampToValueAtTime(0.015, audioCtx.currentTime + 3);
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(masterGain);
+  noise.start();
+  ambientNodes.push({osc: noise, gain: noiseGain});
+}
+
+function stopAmbient(){
+  ambientNodes.forEach(n => {
+    try {
+      n.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+      setTimeout(() => { try { n.osc.stop(); } catch(e){} }, 600);
+    } catch(e){}
+  });
+  ambientNodes = [];
+  ambientPlaying = false;
+}
+
+// 单次音效：心跳低音
+function bump(freq = 60, dur = 0.3, vol = 0.5){
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  osc.frequency.exponentialRampToValueAtTime(freq*0.5, audioCtx.currentTime + dur);
+  gain.gain.value = 0;
+  gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+
+// 单次音效：打字机click
+function tick(freq = 1200, vol = 0.15){
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.value = freq + Math.random()*100;
+  gain.gain.value = 0;
+  gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.001);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = freq;
+  filter.Q.value = 5;
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.05);
+}
+
+// 单次音效：钟点 chime（清脆的金属音）
+function chime(freq = 800, vol = 0.25){
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const osc2 = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc2.type = 'sine';
+  osc.frequency.value = freq;
+  osc2.frequency.value = freq * 2.01;
+  gain.gain.value = 0;
+  gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.5);
+  osc.connect(gain);
+  osc2.connect(gain);
+  gain.connect(masterGain);
+  osc.start();
+  osc2.start();
+  osc.stop(audioCtx.currentTime + 2.5);
+  osc2.stop(audioCtx.currentTime + 2.5);
+}
+
+// 单次音效：whoosh（过场气流声）
+function whoosh(){
+  if (!audioCtx) return;
+  const bufferSize = audioCtx.sampleRate * 0.6;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random()*2-1) * (1 - i/bufferSize);
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 800;
+  filter.frequency.linearRampToValueAtTime(200, audioCtx.currentTime + 0.6);
+  filter.Q.value = 2;
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.2;
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(masterGain);
+  noise.start();
+}
+
+// 单次音效：温柔的"叮"（一个柔和的音点）
+function ding(freq = 1320, vol = 0.18){
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.value = 0;
+  gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.8);
+}
+
+// ====================== 时钟（不依赖音频） ======================
+let startTime = 0;
+let paused = false;
+let pausedAt = 0;
+let isScrubbing = false;
+
+function getTime(){
+  if (paused) return pausedAt;
+  return (performance.now() - startTime) / 1000;
+}
+
+function setTime(t){
+  startTime = performance.now() - t*1000;
+  if (paused) pausedAt = t;
+}
+
+// ====================== 工具函数 ======================
+function show(id){
+  document.querySelectorAll('.shot').forEach(el => el.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+function fmt(t){
+  const m = Math.floor(t/60).toString().padStart(2,'0');
+  const s = Math.floor(t%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+let tokens = [];
+function newToken(){
+  const tk = {alive: true};
+  tokens.push(tk);
+  return tk;
+}
+function killAll(){
+  tokens.forEach(t => t.alive = false);
+  tokens = [];
+  gsap.killTweensOf('*');
+}
+
+// ====================== 24 个 cue ======================
+const cues = [];
+
+// C1 — 0.0s 开场黑屏 + 一束光
+cues.push({ at: 0.0, fn: () => {
+  show('s1');
+  gsap.fromTo('#s1light',
+    {opacity:0, scale:0.3},
+    {opacity:0.7, scale:1, duration:2.5, ease:'power2.out'});
+  // 启动呼吸光点和角标
+  gsap.to('#breath', {opacity:0.9, duration:1.5, delay:0.8});
+  gsap.to('#breath', {
+    opacity:0.3, duration:1.4, repeat:-1, yoyo:true, ease:'sine.inOut', delay:2.3
+  });
+  gsap.to('#tc', {opacity:0.6, duration:1.5, delay:1.5});
+  gsap.to('#ctx', {opacity:0.6, duration:1.5, delay:1.5});
+  bump(45, 0.8, 0.4);
+}});
+
+// C2 — 3.0s 时间码 02:59
+cues.push({ at: 3.0, fn: () => {
+  show('s2');
+  document.getElementById('s2h').textContent = '02';
+  document.getElementById('s2m').textContent = '59';
+  gsap.fromTo('#s2clock',
+    {opacity:0, y:30, filter:'blur(8px)'},
+    {opacity:1, y:0, filter:'blur(0px)', duration:1.2, ease:'power2.out'});
+  gsap.fromTo('#s2label',
+    {opacity:0, letterSpacing:'1em'},
+    {opacity:0.7, letterSpacing:'0.6em', duration:1.5, delay:0.5});
+  whoosh();
+}});
+
+// C3 — 5.5s 时间跳到 03:00
+cues.push({ at: 5.5, fn: () => {
+  // 数字滚动效果
+  const minutes = document.getElementById('s2m');
+  const hours = document.getElementById('s2h');
+  gsap.to([minutes, hours], {y:-20, opacity:0, duration:0.3, ease:'power2.in', onComplete: () => {
+    minutes.textContent = '00';
+    hours.textContent = '03';
+    chime(900, 0.3);
+    gsap.fromTo([minutes, hours], {y:20, opacity:0}, {y:0, opacity:1, duration:0.4, ease:'power2.out'});
+  }});
+  tick(800, 0.1);
+}});
+
+// C4 — 8.0s 切到提示语
+cues.push({ at: 8.0, fn: () => {
+  show('s3');
+  const text = '这个时间，<span class="em">你还醒着</span>。';
+  const el = document.getElementById('s3text');
+  // 拆字符
+  let html = '';
+  const plain = text.replace(/<[^>]+>/g, '');
+  let inEm = false;
+  let i = 0;
+  while (i < text.length) {
+    if (text.substr(i, 14) === '<span class="em">') {
+      inEm = true; i += 17; continue;
+    }
+    if (text.substr(i, 7) === '</span>') {
+      inEm = false; i += 7; continue;
+    }
+    const ch = text[i];
+    if (ch === ' ' || ch === '<' || ch === '>') { i++; continue; }
+    html += `<span class="ch"${inEm ? ' style="color:var(--amber);font-weight:500"' : ''}>${ch}</span>`;
+    i++;
+  }
+  el.innerHTML = html;
+
+  gsap.fromTo('#s3text .ch',
+    {opacity:0, y:20, filter:'blur(6px)'},
+    {opacity:1, y:0, filter:'blur(0px)', duration:0.5, stagger:0.08, ease:'power2.out'});
+  whoosh();
+}});
+
+// C5 — 12.5s 城市窗户
+cues.push({ at: 12.5, fn: () => {
+  show('s4');
+  const city = document.getElementById('s4city');
+  city.innerHTML = '';
+
+  // 生成约 80 个随机位置的"窗户"
+  const windows = [];
+  for (let i = 0; i < 80; i++){
+    const win = document.createElement('div');
+    win.className = 'window';
+    const w = 6 + Math.random()*10;
+    const h = 6 + Math.random()*8;
+    win.style.width = `calc(var(--u) * ${w*0.1})`;
+    win.style.height = `calc(var(--u) * ${h*0.1})`;
+    win.style.left = `${Math.random()*100}%`;
+    win.style.top = `${Math.random()*100}%`;
+    city.appendChild(win);
+    windows.push(win);
+  }
+
+  // 窗户随机亮起
+  windows.forEach((w, i) => {
+    gsap.to(w, {
+      opacity: 0.3 + Math.random()*0.7,
+      duration: 0.3,
+      delay: Math.random() * 1.5,
+      ease: 'power2.out'
+    });
+    // 部分窗户闪烁
+    if (Math.random() > 0.7){
+      gsap.to(w, {
+        opacity: 0.1,
+        duration: 0.5 + Math.random()*1.5,
+        repeat: -1, yoyo: true,
+        delay: 1.5 + Math.random()*2
+      });
+    }
+  });
+
+  // 文字浮现
+  gsap.fromTo('#s4label',
+    {opacity:0, scale:0.95},
+    {opacity:1, scale:1, duration:1.2, delay:1.2, ease:'power2.out'});
+  gsap.fromTo('#s4sub',
+    {opacity:0},
+    {opacity:0.7, duration:0.8, delay:2});
+
+  // 一连串小窗户的音效
+  for (let i = 0; i < 6; i++){
+    setTimeout(() => ding(900 + i*100, 0.08), i*200);
+  }
+}});
+
+// C6 — 17.0s 代码注释
+cues.push({ at: 17.0, fn: () => {
+  show('s5');
+  const lines = document.querySelectorAll('#s5code .line');
+  const cursor = document.querySelector('#s5code .cursor');
+  cursor.style.display = 'none';
+
+  // 隐藏所有
+  lines.forEach(l => {
+    l.style.opacity = '0';
+  });
+
+  // 逐行显示，打字机效果
+  lines.forEach((line, lineIdx) => {
+    setTimeout(() => {
+      line.style.opacity = '1';
+      const text = line.innerHTML;
+      const plainText = line.textContent;
+
+      // 把文本内容拆字，逐字显示
+      line.innerHTML = '';
+      let i = 0;
+      function typeChar(){
+        if (i >= plainText.length) {
+          // 这一行打完，恢复原始 HTML（带高亮）
+          line.innerHTML = text;
+          if (lineIdx === lines.length - 1){
+            cursor.style.display = 'inline-block';
+            const newCursor = document.querySelector('#s5code .cursor');
+            if (newCursor) newCursor.style.display = 'inline-block';
+          }
+          return;
+        }
+        line.textContent = plainText.substring(0, i+1);
+        tick(1100 + Math.random()*300, 0.06);
+        i++;
+        setTimeout(typeChar, 50 + Math.random()*40);
+      }
+      typeChar();
+    }, lineIdx * 1500);
+  });
+}});
+
+// C7 — 23.0s 醒着的人列表
+cues.push({ at: 23.0, fn: () => {
+  show('s6');
+  const items = document.querySelectorAll('#s6list .list-item');
+  items.forEach(it => gsap.set(it, {opacity:0, x:-30}));
+
+  items.forEach((item, i) => {
+    gsap.to(item, {
+      opacity: 1, x: 0,
+      duration: 0.5,
+      delay: i * 0.4,
+      ease: 'power2.out',
+      onStart: () => {
+        if (i < items.length - 1) ding(800 + i*80, 0.1);
+        else chime(660, 0.25); // 最后一项更突出
+      }
+    });
+  });
+}});
+
+// C8 — 27.5s 转折
+cues.push({ at: 27.5, fn: () => {
+  show('s7');
+  gsap.fromTo('#s7 .line1',
+    {opacity:0, y:20},
+    {opacity:1, y:0, duration:0.8, ease:'power2.out'});
+  // 划掉"孤独"
+  gsap.to('#s7strike::after', {});
+  setTimeout(() => {
+    const strike = document.getElementById('s7strike');
+    const after = document.createElement('span');
+    after.style.cssText = `
+      position:absolute; top:50%; left:0;
+      width:0; height:2px; background:var(--muted);
+      transform:translateY(-50%); transition:none;
+    `;
+    strike.style.position = 'relative';
+    strike.appendChild(after);
+    gsap.to(after, {width:'100%', duration:0.4, ease:'power2.inOut'});
+    whoosh();
+  }, 1200);
+
+  gsap.fromTo('#s7 .line2',
+    {opacity:0, y:20},
+    {opacity:1, y:0, duration:0.8, delay:1.8, ease:'power2.out',
+     onStart: () => chime(880, 0.3)});
+}});
+
+// C9 — 32.0s 收尾
+cues.push({ at: 32.0, fn: () => {
+  show('s8');
+  gsap.fromTo('#s8end',
+    {opacity:0, scale:0.95},
+    {opacity:1, scale:1, duration:1.5, ease:'power2.out'});
+  gsap.fromTo('#s8dot',
+    {opacity:0, scale:0},
+    {opacity:1, scale:1, duration:0.6, delay:1.5, ease:'back.out(2)',
+     onStart: () => bump(220, 1.2, 0.3)});
+  gsap.to('#s8dot', {
+    opacity: 0.4, scale: 1.3,
+    duration: 1.5, delay: 2.5,
+    repeat: -1, yoyo: true, ease:'sine.inOut'
+  });
+  gsap.fromTo('#s8sig',
+    {opacity:0, letterSpacing:'1em'},
+    {opacity:0.5, letterSpacing:'0.5em', duration:1.5, delay:2});
+
+  // 角标淡出
+  gsap.to(['#tc', '#ctx', '#breath'], {opacity:0, duration:2, delay:3});
+
+  // 收尾后氛围渐弱
+  setTimeout(() => {
+    if (ambientPlaying){
+      ambientNodes.forEach(n => {
+        try {
+          n.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 3);
+        } catch(e){}
+      });
+    }
+  }, 2000);
+}});
+
+// ====================== 主循环 ======================
+let fired = new Set();
+let lastT = 0;
+
+function loop(){
+  const t = getTime();
+  if (!isScrubbing) document.getElementById('scrub').value = Math.min(t, 35);
+  document.getElementById('ctrlTc').textContent = `${fmt(t)} / 00:35`;
+  document.getElementById('tc').textContent = `03:00:${Math.floor(t).toString().padStart(2,'0')}`;
+
+  // 倒带检测
+  if (t < lastT - 0.5){
+    fired.clear();
+    killAll();
+    let last = null;
+    cues.forEach((c, i) => { if (t >= c.at) last = i; });
+    if (last !== null){
+      for (let i = 0; i <= last; i++) fired.add(i);
+      cues[last].fn();
+    }
+  }
+
+  cues.forEach((c, i) => {
+    if (t >= c.at && !fired.has(i)){
+      fired.add(i);
+      c.fn();
+    }
+  });
+
+  lastT = t;
+  if (t < 36) requestAnimationFrame(loop);
+}
+
+// ====================== 启动 ======================
+const startBtn = document.getElementById('startBtn');
+const controls = document.getElementById('controls');
+const ctrlPlay = document.getElementById('ctrlPlay');
+const scrub = document.getElementById('scrub');
+const audioHint = document.getElementById('audioHint');
+
+startBtn.addEventListener('click', () => {
+  startBtn.classList.add('hidden');
+  controls.style.display = 'flex';
+  initAudio();
+  startAmbient();
+  startTime = performance.now();
+  fired.clear();
+  paused = false;
+
+  // 显示音频提示
+  gsap.fromTo(audioHint, {opacity:0}, {opacity:0.7, duration:0.5});
+  gsap.to(audioHint, {opacity:0, duration:0.5, delay:2.5});
+
+  loop();
+});
+
+ctrlPlay.addEventListener('click', () => {
+  if (paused){
+    paused = false;
+    startTime = performance.now() - pausedAt*1000;
+    ctrlPlay.textContent = '⏸';
+    if (!ambientPlaying) startAmbient();
+    loop();
+  } else {
+    paused = true;
+    pausedAt = getTime();
+    ctrlPlay.textContent = '▶';
+  }
+});
+
+document.getElementById('ctrlRestart').addEventListener('click', () => {
+  killAll();
+  fired.clear();
+  startTime = performance.now();
+  paused = false;
+  ctrlPlay.textContent = '⏸';
+  if (!ambientPlaying) startAmbient();
+  loop();
+});
+
+scrub.addEventListener('input', () => {
+  isScrubbing = true;
+  setTime(parseFloat(scrub.value));
+});
+scrub.addEventListener('change', () => {
+  isScrubbing = false;
+});
+
+// 键盘控制
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space'){ e.preventDefault(); ctrlPlay.click(); }
+  if (e.code === 'ArrowLeft'){ setTime(Math.max(0, getTime() - 2)); }
+  if (e.code === 'ArrowRight'){ setTime(Math.min(35, getTime() + 2)); }
+});
+</script>
+
+</body>
+</html>
