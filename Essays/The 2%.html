@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>那2%</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;700&display=swap');
+
+  :root {
+    --bg: #0a0908;
+    --surface: #121110;
+    --text: #d4cfc8;
+    --text-dim: #6b6560;
+    --accent: #c45d3e;
+    --accent-dim: #8a3d28;
+    --gold: #b8944f;
+    --serif: 'Noto Serif SC', 'Songti SC', serif;
+    --sans: 'Noto Sans SC', 'PingFang SC', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 2;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 64px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #1a1917;
+  }
+
+  .title {
+    font-family: var(--sans);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: #e8e2d8;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    font-weight: 300;
+  }
+
+  .section {
+    margin-bottom: 56px;
+  }
+
+  .section-number {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--accent-dim);
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  p {
+    margin-bottom: 20px;
+    text-align: justify;
+  }
+
+  .highlight {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .gold {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  .pull-quote {
+    margin: 36px 0;
+    padding: 24px 28px;
+    border-left: 2px solid var(--accent);
+    background: rgba(196, 93, 62, 0.04);
+    font-size: 16px;
+    line-height: 2.1;
+    color: #bfb9b0;
+  }
+
+  .scene {
+    margin: 28px 0;
+    padding: 20px 24px;
+    background: var(--surface);
+    border-radius: 2px;
+    font-size: 15px;
+    line-height: 2.2;
+    color: #9e9890;
+  }
+
+  .scene p {
+    margin-bottom: 8px;
+    text-align: left;
+  }
+
+  .scene p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* 幂律分布可视化 */
+  .power-law {
+    margin: 36px 0;
+    padding: 28px 24px;
+    background: var(--surface);
+    border-radius: 2px;
+    text-align: center;
+  }
+
+  .power-law-bar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    height: 120px;
+    margin-bottom: 16px;
+  }
+
+  .bar {
+    background: var(--accent-dim);
+    border-radius: 1px 1px 0 0;
+    width: 14px;
+    opacity: 0.6;
+  }
+
+  .bar.top { background: var(--accent); opacity: 1; }
+
+  .power-law-label {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .power-law-split {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding: 0 8px;
+  }
+
+  .power-law-split span {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .split-left { color: var(--text-dim); }
+  .split-right { color: var(--accent); }
+
+  /* 时间线 */
+  .timeline {
+    margin: 32px 0;
+    padding: 0 0 0 20px;
+    border-left: 1px solid #2a2826;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding: 0 0 24px 20px;
+    font-size: 15px;
+    color: #9e9890;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 10px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+  }
+
+  .timeline-item.active::before {
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(196, 93, 62, 0.4);
+  }
+
+  .timeline-item:last-child { padding-bottom: 0; }
+
+  .ending {
+    margin-top: 64px;
+    padding-top: 40px;
+    border-top: 1px solid #1a1917;
+    text-align: center;
+    line-height: 2.4;
+  }
+
+  .ending p {
+    text-align: center;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--text-dim);
+    background: var(--surface);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin: 4px;
+  }
+
+  .draft-note {
+    margin-top: 80px;
+    padding: 24px;
+    background: #0f0e0d;
+    border: 1px dashed #2a2826;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 2;
+  }
+
+  .draft-note strong {
+    color: var(--accent);
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="title">那 2%</div>
+    <div class="subtitle">人性 × 客观规律 · 第二篇</div>
+  </div>
+
+  <!-- 第一段：规律 -->
+  <div class="section">
+    <div class="section-number">01 — 一条你不想看的曲线</div>
+
+    <p>世界上有一条曲线，长这样：</p>
+
+    <div class="power-law">
+      <div class="power-law-bar">
+        <div class="bar" style="height: 6px;"></div>
+        <div class="bar" style="height: 6px;"></div>
+        <div class="bar" style="height: 6px;"></div>
+        <div class="bar" style="height: 7px;"></div>
+        <div class="bar" style="height: 7px;"></div>
+        <div class="bar" style="height: 7px;"></div>
+        <div class="bar" style="height: 8px;"></div>
+        <div class="bar" style="height: 8px;"></div>
+        <div class="bar" style="height: 9px;"></div>
+        <div class="bar" style="height: 9px;"></div>
+        <div class="bar" style="height: 10px;"></div>
+        <div class="bar" style="height: 11px;"></div>
+        <div class="bar" style="height: 12px;"></div>
+        <div class="bar" style="height: 14px;"></div>
+        <div class="bar" style="height: 16px;"></div>
+        <div class="bar" style="height: 19px;"></div>
+        <div class="bar" style="height: 24px;"></div>
+        <div class="bar" style="height: 32px;"></div>
+        <div class="bar top" style="height: 55px;"></div>
+        <div class="bar top" style="height: 110px;"></div>
+      </div>
+      <div class="power-law-label">幂律分布</div>
+      <div class="power-law-split">
+        <span class="split-left">← 98% 的人在这里</span>
+        <span class="split-right">2% 在这里 →</span>
+      </div>
+    </div>
+
+    <p>2%的人拿走了98%的钱。2%的人拿走了98%的注意力。2%的人拿走了98%的机会、运气、资源、关系、爱。</p>
+
+    <p>这不是阴谋论。这不是仇富。</p>
+
+    <p>这是<span class="highlight">数学</span>。和你努不努力无关。和你生气不生气无关。它就长这样。</p>
+
+    <p>第一次看到这条曲线的时候，我没有学到什么。</p>
+
+    <p>我只有一个反应——</p>
+
+    <div class="pull-quote">凭什么那个人不是我？</div>
+  </div>
+
+  <!-- 第二段：愤怒 -->
+  <div class="section">
+    <div class="section-number">02 — 愤怒</div>
+
+    <p>我看到同龄人已经在创业了。有的比我还小几岁。</p>
+    <p>我看到别人家庭和睦，父母通情达理，像是抽中了某种彩票。</p>
+    <p>我的家人呢？在房子最贵的时候冲进去买，房贷压得我学费都交不上。</p>
+
+    <p>我看到有人天生睡四个小时就够，精力充沛。<span class="highlight">基因彩票</span>。我也想啊。但我早上十个闹钟，一响就关，眼睛都不用睁。被动技能倒是练出来了一个。</p>
+
+    <p>然后你开始想：</p>
+
+    <div class="scene">
+      <p>不就是创业嘛，老子也可以啊。</p>
+      <p>有什么嘛，干他啊。</p>
+      <p>怕什么呢？</p>
+      <p>死亡不也就那样嘛。</p>
+    </div>
+
+    <p>这股劲是真的。愤怒是真的。不甘是真的。</p>
+
+    <p>但你注意——</p>
+
+    <p>说完这些话之后，你做了什么？</p>
+
+    <p><span class="highlight">什么也没做。</span></p>
+
+    <p>或者说，你做了和昨天一模一样的事。打了一局游戏。刷了一会短视频。那股劲像烟一样，升上去了，散了。</p>
+
+    <div class="pull-quote">愤怒是人性里最烈的燃料。<br>但如果你只是让它在脑子里烧，不往外接任何东西——<br>它就只是把你自己烧了一遍。</div>
+  </div>
+
+  <!-- 第三段：更深的陷阱 -->
+  <div class="section">
+    <div class="section-number">03 — 比不动更深的陷阱</div>
+
+    <p>不动不是最可怕的。</p>
+
+    <p>最可怕的是——<span class="highlight">你骂了自己，然后觉得自己已经在努力了。</span></p>
+
+    <p>你有没有这种时刻？</p>
+
+    <div class="scene">
+      <p>想着想着不知道飘哪去了。这也叫反思？</p>
+      <p>复盘？经验都没有复个鸡毛。</p>
+      <p>行动啊，怎么不动呢？想啥呢？脑子不累吗？</p>
+      <p>知识也学不会，看了就忘，左耳朵进右耳朵出。</p>
+    </div>
+
+    <p>这些话你是不是很熟悉？</p>
+
+    <p>你以为这是在"自我鞭策"。</p>
+
+    <p>不是。这是另一种<span class="highlight">麻醉</span>。</p>
+
+    <p>因为骂完自己之后，你获得了一种奇怪的满足感——好像骂本身就是一个行动。好像你狠狠骂了自己一顿，就已经比昨天进步了。</p>
+
+    <p>然后你躺下了。带着一点"我至少面对了自己"的悲壮感。</p>
+
+    <p>明天呢？</p>
+
+    <p>明天再骂一次。</p>
+
+    <div class="pull-quote">自我批判是最精致的自我欺骗。<br>因为它让你以为清醒本身就是行动。<br>但清醒如果不接动作，它就只是<span class="highlight">更高级的睡眠</span>。</div>
+  </div>
+
+  <!-- 第四段：那个转折 -->
+  <div class="section">
+    <div class="section-number">04 — 拱了一下</div>
+
+    <p>我不记得是哪一天了。</p>
+
+    <p>也许是某个人说了一句什么话。也许是某个夜晚那股"干他啊"的劲没有散掉。也许是我终于意识到——再这样下去，我会"死"的很惨。不是身体的死。是一天复制一天，复制到你三十岁、四十岁，回头一看，发现自己的人生是一个复印件。那种死法。</p>
+
+    <p>也可能这些原因全部同时存在，在同一个方向上推了我一把。</p>
+
+    <p>总之，我做了一件很小的事。</p>
+
+    <p>我开始<span class="highlight">问问题</span>。</p>
+
+    <p>跟AI聊。什么都问。生活里的困惑，心理学、脑科学、认知科学——不是要成为专家，是真的有东西搞不懂，想搞懂。然后开始听播客。然后看了真正意义上的第一本书。</p>
+
+    <p>这些事说出来一点都不酷。不是那种"我从负债百万到年入千万"的逆袭故事。</p>
+
+    <p>就是<span class="gold">拱了一下</span>。</p>
+
+    <p>像一颗种子在土里，没有破土，没有开花，只是裂开了一道缝。</p>
+
+    <p>但那道缝和之前所有的"我要改变"有一个本质的区别——</p>
+
+    <div class="pull-quote">之前每一次"我要改变"，都是对自己的<span class="highlight">审判</span>。<br>这一次不是。这一次只是——<br><span class="gold">我想知道一点什么。</span></div>
+
+    <p>不是"我必须自律"。不是"我要逆袭"。不是"我不能再这样了"。</p>
+
+    <p>只是好奇。只是有一个问题，不知道答案，想知道。</p>
+
+    <p>那是一种非常轻的力。</p>
+
+    <p>但轻，才走得远。</p>
+  </div>
+
+  <!-- 第五段：幂律分布的另一面 -->
+  <div class="section">
+    <div class="section-number">05 — 幂律分布没有告诉你的事</div>
+
+    <p>幂律分布是真的。2%拿走大部分，98%分剩下的。这件事你改变不了。</p>
+
+    <p>但它有一个缝隙，大多数人没看见。</p>
+
+    <p>幂律分布描述的是<span class="highlight">结果</span>——谁拿到了多少。</p>
+    <p>它没有描述<span class="gold">过程</span>——谁正在往哪里移动。</p>
+
+    <p>你今天在98%那一侧。这是事实。愤怒没有用。不甘没有用。骂自己更没有用。</p>
+
+    <p>但你昨天和今天的位置一样吗？</p>
+
+    <p>如果你昨天在刷短视频，今天在读一本让你困惑的书——你没有从98%变成2%，但你<span class="highlight">动了</span>。方向是对的。</p>
+
+    <p>幂律分布是一张照片。它拍的是此刻。</p>
+
+    <p>但你是一段视频。</p>
+
+    <div class="pull-quote">不要拿一张照片去定义一段视频。</div>
+
+    <p>规律是冷的。它不在乎你的愤怒。但它也不在乎你的自我否定。它只看一件事——</p>
+
+    <p><span class="highlight">你今天和昨天相比，拱了没有。</span></p>
+  </div>
+
+  <!-- 第六段 -->
+  <div class="section">
+    <div class="section-number">06 — 牛逼人的事你都不做</div>
+
+    <p>我之前给自己写过一句总结，挺准的：</p>
+
+    <p>牛逼人的事，样样不做。之外的事，样样精通。</p>
+
+    <p>闹钟一响就关。知识看了就忘。计划列了就废。反思想着想着飘了。</p>
+
+    <p>说出来好笑。但笑完之后，我发现一件事——</p>
+
+    <p>那些"牛逼人的事"，一开始也不是什么牛逼的事。</p>
+
+    <p>是早起。是读完一章。是把一个问题想清楚。是把今天过得和昨天有一点点不同。</p>
+
+    <p>它们变成"牛逼人的事"，是因为大多数人——包括我——<span class="highlight">连续做不了三天</span>。</p>
+
+    <p>不是因为那些事难。是因为人性会拉你回去。每一天，每一个小时，人性都在跟你说同一句话：</p>
+
+    <div class="pull-quote">今天就算了。明天再说。</div>
+
+    <p>第一篇文章里我写过——人不是死于一个巨大的错误。人是死于一万个"今天就算了"。</p>
+
+    <p>现在我想补一句：</p>
+
+    <p><span class="gold">人也不是活过来于一个巨大的顿悟。人是活过来于一万个"今天试一下"。</span></p>
+
+    <p>每一个"试一下"都很轻。轻到你觉得不值一提。</p>
+
+    <p>但幂律分布的规律同样作用于此——那些2%的人，不是天赋异禀。他们只是<span class="highlight">拱的次数，比你多</span>。</p>
+  </div>
+
+  <!-- 结尾 -->
+  <div class="ending">
+    <p>我不知道我最终能不能到那2%。</p>
+    <p>可能不能。概率不站在我这边。</p>
+    <p style="margin-top: 24px;">但我知道一件事：</p>
+    <p><span class="highlight" style="color: var(--accent);">我不想再拿一张照片，给自己判死刑。</span></p>
+    <p style="margin-top: 24px; color: var(--text-dim); font-size: 15px;">今天拱了吗？</p>
+    <p style="color: var(--text-dim); font-size: 15px;">哪怕一下。</p>
+
+    <div style="margin-top: 32px;">
+      <span class="tag"># 人性与规律</span>
+      <span class="tag"># 幂律分布</span>
+      <span class="tag"># 那2%</span>
+      <span class="tag"># 成长</span>
+    </div>
+  </div>
+
+  <!-- 给作者的备注 -->
+  <div class="draft-note">
+    <strong>[ 给你的备注，不是文章的一部分 ]</strong><br><br>
+
+    1. <strong>「拱」这个字</strong>——是整篇文章的核心意象。不是"奋斗"、不是"逆袭"、不是"努力"。是拱。像种子在土里，像虫子往前挪。这个字本身就反鸡汤，留着。<br><br>
+
+    2. <strong>第三段「自我批判是最精致的自我欺骗」</strong>——这是这篇的核弹，对应第一篇的「我写的那个人是我自己」。你看读者读到这里会不会被钉住。<br><br>
+
+    3. <strong>第四段你的真实经历</strong>——我用了"跟AI聊"、"听播客"、"看了第一本书"这些细节。如果你觉得"跟AI聊"在小红书上说出来会有顾虑，可以换。但我建议留——因为2024、2025年很多人的真实转折点就是这个，你说出来反而是一种辨识度。<br><br>
+
+    4. <strong>和第一篇的衔接</strong>——第六段引用了第一篇的「一万个今天就算了」，然后补了一句「一万个今天试一下」。这是系列感的来源。读者读到这里会觉得：这个人在一篇一篇地走，不是在表演。<br><br>
+
+    5. <strong>「照片vs视频」这个比喻</strong>——你看看读起来是不是够利。如果不够，我可以换一个更扎的。<br><br>
+
+    6. <strong>结尾依然没给方法论。</strong>只问了一句「今天拱了吗」。跟第一篇的「你可以不签」一样，留白。这是你的签名动作，不要丢。<br><br>
+
+    7. <strong>标题「那2%」</strong>——备选：「凭什么不是我」「拱」「照片和视频」。你挑。
+  </div>
+
+</div>
+</body>
+</html>
