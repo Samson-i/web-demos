@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>MIRROR — 摄像头实时风格化</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:     #050810;
+    --bg2:    #0a0e1a;
+    --amber:  #f4a261;
+    --bone:   #d4cfc4;
+    --muted:  #5a6478;
+    --line:   #1a2030;
+    --cyan:   #6ba3c5;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+  html, body {
+    width:100%; height:100%;
+    background: var(--bg);
+    overflow:hidden;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--bone);
+  }
+  body { display:flex; align-items:center; justify-content:center; }
+
+  /* 噪点滤镜，营造质感 */
+  body::after {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:200;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity:0.4; mix-blend-mode:overlay;
+  }
+
+  /* 主画布 */
+  #stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #canvas {
+    background: var(--bg);
+    max-width: 95vw;
+    max-height: 85vh;
+    box-shadow: 0 0 60px rgba(0,0,0,0.8);
+    border: 1px solid var(--line);
+  }
+
+  /* 摄像头隐藏（仅用于读取像素） */
+  #video {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 1px;
+    height: 1px;
+  }
+
+  /* 顶部 HUD */
+  .hud-top {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+  }
+  .mode-btn {
+    background: rgba(5, 8, 16, 0.85);
+    color: var(--bone);
+    border: 1px solid var(--line);
+    padding: 10px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .mode-btn:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+  .mode-btn.active {
+    background: var(--amber);
+    color: var(--bg);
+    border-color: var(--amber);
+  }
+
+  /* 左上角状态 */
+  .hud-status {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+  }
+  .hud-status .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--amber);
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--amber); }
+    50% { opacity: 0.3; }
+  }
+
+  /* 右上角参数 */
+  .hud-params {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.8;
+  }
+  .hud-params span { color: var(--bone); }
+
+  /* 底部说明 */
+  .hud-bottom {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* 启动覆盖层 */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+  }
+  .overlay h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 300;
+    font-size: 48px;
+    letter-spacing: 0.4em;
+    color: var(--bone);
+  }
+  .overlay .subtitle {
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-align: center;
+    line-height: 2;
+    max-width: 500px;
+  }
+  .overlay .start-btn {
+    background: transparent;
+    color: var(--bone);
+    border: 1px solid var(--amber);
+    padding: 16px 50px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.4em;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 20px;
+  }
+  .overlay .start-btn:hover {
+    background: var(--amber);
+    color: var(--bg);
+  }
+  .overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s;
+  }
+
+  .error {
+    color: #c47a3e;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+
+<!-- 启动覆盖层 -->
+<div class="overlay" id="overlay">
+  <h1>M I R R O R</h1>
+  <div class="subtitle">
+    把你变成粒子 · 字符 · 像素 · 线条<br>
+    实时镜像 · 浏览器现场计算
+  </div>
+  <button class="start-btn" id="startBtn">▸ ENABLE CAMERA</button>
+  <div class="error" id="error"></div>
+</div>
+
+<!-- HUD 顶部按钮 -->
+<div class="hud-top" id="hudTop" style="display:none;">
+  <button class="mode-btn active" data-mode="particles">PARTICLES</button>
+  <button class="mode-btn" data-mode="ascii">ASCII</button>
+  <button class="mode-btn" data-mode="pixels">PIXELS</button>
+  <button class="mode-btn" data-mode="lines">LINES</button>
+</div>
+
+<!-- HUD 状态 -->
+<div class="hud-status" id="hudStatus" style="display:none;">
+  <span class="dot"></span>LIVE
+</div>
+
+<!-- HUD 参数 -->
+<div class="hud-params" id="hudParams" style="display:none;">
+  MODE: <span id="paramMode">PARTICLES</span><br>
+  FPS:  <span id="paramFps">--</span><br>
+  RES:  <span id="paramRes">--</span>
+</div>
+
+<!-- HUD 底部 -->
+<div class="hud-bottom" id="hudBottom" style="display:none;">
+  按 1 2 3 4 切换模式 · 按 S 截图保存
+</div>
+
+<!-- 隐藏的摄像头视频 -->
+<video id="video" autoplay playsinline muted></video>
+
+<!-- 主舞台 -->
+<div id="stage">
+  <canvas id="canvas" width="960" height="540"></canvas>
+</div>
+
+<script>
+// ============= 全局变量 =============
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+// 用于读取摄像头像素的隐藏 canvas（小尺寸，提高性能）
+const hiddenCanvas = document.createElement('canvas');
+const hiddenCtx = hiddenCanvas.getContext('2d', { willReadFrequently: true });
+
+let currentMode = 'particles';
+let running = false;
+
+// FPS 计算
+let lastFpsTime = performance.now();
+let frameCount = 0;
+let currentFps = 0;
+
+// ============= 启动摄像头 =============
+const startBtn = document.getElementById('startBtn');
+const overlay = document.getElementById('overlay');
+const errorEl = document.getElementById('error');
+
+startBtn.addEventListener('click', async () => {
+  try {
+    errorEl.textContent = '';
+    startBtn.textContent = '▸ STARTING...';
+
+    // 请求摄像头
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        facingMode: 'user'
+      },
+      audio: false
+    });
+
+    video.srcObject = stream;
+    await video.play();
+
+    // 等视频元数据加载完，再设置 canvas 尺寸
+    await new Promise(resolve => {
+      if (video.videoWidth > 0) resolve();
+      else video.addEventListener('loadedmetadata', resolve, { once: true });
+    });
+
+    // 设置画布尺寸（保持视频比例）
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    canvas.width = 960;
+    canvas.height = Math.round(960 * vh / vw);
+
+    // 隐藏画布用更小的分辨率以提高性能（处理速度快很多）
+    hiddenCanvas.width = 160;
+    hiddenCanvas.height = Math.round(160 * vh / vw);
+
+    document.getElementById('paramRes').textContent = `${vw}×${vh}`;
+
+    // 切换到主界面
+    overlay.classList.add('hidden');
+    setTimeout(() => { overlay.style.display = 'none'; }, 600);
+    document.getElementById('hudTop').style.display = 'flex';
+    document.getElementById('hudStatus').style.display = 'block';
+    document.getElementById('hudParams').style.display = 'block';
+    document.getElementById('hudBottom').style.display = 'block';
+
+    running = true;
+    loop();
+  } catch (err) {
+    console.error(err);
+    startBtn.textContent = '▸ ENABLE CAMERA';
+    errorEl.innerHTML = `无法访问摄像头：${err.message}<br><br>请确认：<br>1. 浏览器允许了摄像头权限<br>2. 没有其他软件正在使用摄像头<br>3. 使用 Chrome / Safari / Edge 等现代浏览器`;
+  }
+});
+
+// ============= 模式切换 =============
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+    document.getElementById('paramMode').textContent = currentMode.toUpperCase();
+  });
+});
+
+// 键盘快捷键
+document.addEventListener('keydown', (e) => {
+  const modes = ['particles', 'ascii', 'pixels', 'lines'];
+  const num = parseInt(e.key);
+  if (num >= 1 && num <= 4) {
+    document.querySelectorAll('.mode-btn')[num-1].click();
+  }
+  if (e.key.toLowerCase() === 's') {
+    saveSnapshot();
+  }
+});
+
+// ============= 截图保存 =============
+function saveSnapshot() {
+  const link = document.createElement('a');
+  link.download = `mirror-${currentMode}-${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ============= 4 种渲染模式 =============
+
+// 模式 1: 粒子（亮度→粒子密度）
+function renderParticles(pixels, w, h) {
+  ctx.fillStyle = 'rgba(5, 8, 16, 0.15)'; // 半透明黑，制造拖尾
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const cellW = canvas.width / w;
+  const cellH = canvas.height / h;
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      const brightness = (r + g + b) / 3;
+
+      // 跳过暗的像素，只画亮的
+      if (brightness < 80) continue;
+
+      // 镜像 x 坐标（让画面像照镜子）
+      const mx = canvas.width - (x + 0.5) * cellW;
+      const my = (y + 0.5) * cellH;
+
+      // 粒子大小由亮度决定
+      const size = (brightness / 255) * 3.5;
+
+      // 根据亮度决定颜色（暗→冷蓝，亮→暖橘）
+      const t = brightness / 255;
+      const cr = Math.round(107 + t * (244 - 107));
+      const cg = Math.round(163 + t * (162 - 163));
+      const cb = Math.round(197 + t * (97 - 197));
+
+      ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, ${0.6 + t * 0.4})`;
+      ctx.beginPath();
+      ctx.arc(mx, my, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+// 模式 2: ASCII 字符
+const asciiChars = ' .·:-=+*#%@';
+function renderAscii(pixels, w, h) {
+  ctx.fillStyle = '#050810';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 重新缩小，让字符更清晰
+  const cols = 120;
+  const rows = Math.round(cols * h / w * 0.5); // 字符是高的，要压扁
+
+  const cellW = canvas.width / cols;
+  const cellH = canvas.height / rows;
+
+  ctx.font = `${Math.floor(cellH * 1.2)}px 'JetBrains Mono', monospace`;
+  ctx.textBaseline = 'top';
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      // 从原像素采样
+      const sx = Math.floor(x * w / cols);
+      const sy = Math.floor(y * h / rows);
+      const i = (sy * w + sx) * 4;
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      const brightness = (r + g + b) / 3;
+
+      const charIdx = Math.floor((brightness / 255) * (asciiChars.length - 1));
+      const char = asciiChars[charIdx];
+
+      // 镜像
+      const mx = canvas.width - (x + 1) * cellW;
+      const my = y * cellH;
+
+      const t = brightness / 255;
+      const cr = Math.round(90 + t * (244 - 90));
+      const cg = Math.round(100 + t * (162 - 100));
+      const cb = Math.round(120 + t * (97 - 120));
+
+      ctx.fillStyle = `rgb(${cr}, ${cg}, ${cb})`;
+      ctx.fillText(char, mx, my);
+    }
+  }
+}
+
+// 模式 3: 像素马赛克
+function renderPixels(pixels, w, h) {
+  ctx.fillStyle = '#050810';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const cellW = canvas.width / w;
+  const cellH = canvas.height / h;
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+
+      // 降色调，做风格化
+      const brightness = (r + g + b) / 3;
+
+      // 量化到 5 个级别
+      const levels = 5;
+      const q = Math.floor(brightness / 255 * levels) / levels;
+
+      // 用暖色调映射
+      const cr = Math.round(20 + q * (244 - 20));
+      const cg = Math.round(25 + q * (180 - 25));
+      const cb = Math.round(40 + q * (130 - 40));
+
+      // 镜像
+      const mx = canvas.width - (x + 1) * cellW;
+      const my = y * cellH;
+
+      ctx.fillStyle = `rgb(${cr}, ${cg}, ${cb})`;
+      ctx.fillRect(mx, my, cellW + 1, cellH + 1); // +1 防止缝隙
+    }
+  }
+}
+
+// 模式 4: 边缘线条
+let prevPixels = null;
+function renderLines(pixels, w, h) {
+  ctx.fillStyle = 'rgba(5, 8, 16, 0.25)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const cellW = canvas.width / w;
+  const cellH = canvas.height / h;
+
+  // 先算出每个像素的"亮度图"
+  const lum = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    const j = i * 4;
+    lum[i] = (pixels[j] + pixels[j+1] + pixels[j+2]) / 3;
+  }
+
+  // 边缘检测：比较每个像素和右边/下边像素的差
+  ctx.strokeStyle = 'rgba(244, 162, 97, 0.8)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+
+  for (let y = 0; y < h - 1; y++) {
+    for (let x = 0; x < w - 1; x++) {
+      const i = y * w + x;
+      const dx = Math.abs(lum[i] - lum[i + 1]);
+      const dy = Math.abs(lum[i] - lum[i + w]);
+      const edge = dx + dy;
+
+      if (edge > 40) {
+        // 镜像
+        const mx = canvas.width - (x + 0.5) * cellW;
+        const my = (y + 0.5) * cellH;
+        const size = Math.min(edge / 30, 4);
+
+        ctx.moveTo(mx - size, my);
+        ctx.lineTo(mx + size, my);
+        ctx.moveTo(mx, my - size);
+        ctx.lineTo(mx, my + size);
+      }
+    }
+  }
+  ctx.stroke();
+}
+
+// ============= 主循环 =============
+function loop() {
+  if (!running) return;
+
+  // 把摄像头画面画到隐藏的小 canvas，读取像素
+  hiddenCtx.drawImage(video, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+  const imageData = hiddenCtx.getImageData(0, 0, hiddenCanvas.width, hiddenCanvas.height);
+  const pixels = imageData.data;
+  const w = hiddenCanvas.width;
+  const h = hiddenCanvas.height;
+
+  // 根据模式渲染
+  switch (currentMode) {
+    case 'particles': renderParticles(pixels, w, h); break;
+    case 'ascii':     renderAscii(pixels, w, h); break;
+    case 'pixels':    renderPixels(pixels, w, h); break;
+    case 'lines':     renderLines(pixels, w, h); break;
+  }
+
+  // FPS 计算
+  frameCount++;
+  const now = performance.now();
+  if (now - lastFpsTime > 1000) {
+    currentFps = Math.round(frameCount * 1000 / (now - lastFpsTime));
+    document.getElementById('paramFps').textContent = currentFps;
+    frameCount = 0;
+    lastFpsTime = now;
+  }
+
+  requestAnimationFrame(loop);
+}
+</script>
+
+</body>
+</html>
