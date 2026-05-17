@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>身体·注意力·语言</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;700&family=Cormorant+Garamond:ital,wght@0,200;0,300;1,200;1,300&display=swap" rel="stylesheet">
+
+<style>
+/* ─── TOKENS ─────────────────────────────────── */
+:root {
+  --black:   #080705;
+  --bone:    #efe9d8;
+  --bone-60: rgba(239,233,216,0.6);
+  --bone-30: rgba(239,233,216,0.3);
+  --bone-15: rgba(239,233,216,0.15);
+  --blood:   #d6321f;
+  --serif:   "Noto Serif SC","Cormorant Garamond",serif;
+  --latin:   "Cormorant Garamond",serif;
+
+  --xxl: clamp(8rem, 18vw, 16rem);
+  --xl:  clamp(5rem, 12vw, 10rem);
+  --lg:  clamp(2.5rem, 5vw, 5rem);
+  --md:  clamp(1.5rem, 3vw, 2.5rem);
+  --sm:  clamp(0.9rem, 1.3vw, 1.1rem);
+  --xs:  0.72rem;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--black);
+  color: var(--bone);
+  font-family: var(--serif);
+  font-weight: 300;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ─── GRAIN ─── */
+#grain {
+  position:fixed; inset:0;
+  pointer-events:none; z-index:200;
+  opacity:0.07; mix-blend-mode:overlay;
+}
+#grain svg { width:100%; height:100%; }
+
+/* ─── VIGNETTE ─── */
+#vig {
+  position:fixed; inset:0;
+  pointer-events:none; z-index:199;
+  background:radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.65) 100%);
+}
+
+/* ─── ATMOSPHERE ─── */
+#atm {
+  position:fixed; inset:0;
+  pointer-events:none; z-index:1;
+  opacity:0;
+  transition: opacity 2.8s ease;
+}
+#atm.act1 {
+  opacity:1;
+  background:radial-gradient(ellipse 90% 45% at 50% 105%, rgba(180,55,30,0.25) 0%, transparent 65%);
+  animation: breathe 10s ease-in-out infinite;
+}
+#atm.act2 {
+  opacity:1;
+  background:radial-gradient(ellipse 70% 35% at 50% -5%, rgba(70,150,190,0.12) 0%, transparent 55%);
+}
+#atm.act3 {
+  opacity:1;
+  background:linear-gradient(to bottom, transparent 50%, rgba(26,26,24,0.5) 100%);
+}
+@keyframes breathe {
+  0%,100% { opacity:0.7; }
+  50%      { opacity:1.0; }
+}
+
+/* ─── FLASH ─── */
+#flash {
+  position:fixed; inset:0;
+  pointer-events:none; z-index:198;
+  background:var(--black);
+  opacity:0;
+}
+
+/* ─── PROGRESS BAR ─── */
+#bar {
+  position:fixed; top:0; left:0;
+  height:1px; width:0%;
+  background:var(--blood);
+  box-shadow:0 0 8px rgba(214,50,31,0.5);
+  z-index:210;
+  transition:width 0.1s linear;
+}
+
+/* ─── META LABEL ─── */
+#meta {
+  position:fixed; top:1.4rem; left:1.5rem;
+  font-family:var(--latin); font-size:0.62rem;
+  letter-spacing:0.5em; text-transform:uppercase;
+  color:var(--bone-30); z-index:205;
+  pointer-events:none;
+  opacity:0; transition:opacity 1.2s ease;
+  display:flex; gap:0.6rem; align-items:center;
+}
+#meta.show { opacity:1; }
+#meta-act { color:var(--blood); opacity:0.7; }
+
+/* ─── CONTROLS ─── */
+#controls {
+  position:fixed; bottom:1.8rem; right:1.8rem;
+  z-index:205; display:flex; gap:0.55rem;
+  opacity:0; transition:opacity 1.2s ease;
+}
+#controls.show { opacity:0.4; }
+#controls:hover { opacity:1 !important; }
+
+.cbtn {
+  border:1px solid var(--bone-30);
+  background:rgba(8,7,5,0.55);
+  color:var(--bone-60);
+  height:38px; padding:0 1rem;
+  border-radius:999px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-family:var(--latin); font-size:0.68rem;
+  letter-spacing:0.3em; text-transform:uppercase;
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  transition:border-color 0.3s, color 0.3s, background 0.3s;
+}
+.cbtn:hover { border-color:var(--bone-60); color:var(--bone); }
+.cbtn.on   { border-color:var(--blood); color:var(--blood); background:rgba(214,50,31,0.08); }
+.cbtn svg  { width:10px; height:10px; fill:currentColor; flex-shrink:0; }
+
+/* ─── SCROLL HINT ─── */
+#hint {
+  position:fixed; bottom:2rem; left:50%;
+  transform:translateX(-50%);
+  font-family:var(--latin); font-size:0.6rem;
+  letter-spacing:0.5em; text-transform:uppercase;
+  color:var(--bone-30); z-index:205; pointer-events:none;
+  opacity:0; transition:opacity 1.5s ease;
+  text-align:center;
+}
+#hint.show { opacity:1; }
+#hint::after {
+  content:''; display:block;
+  width:1px; height:26px;
+  background:var(--bone-30);
+  margin:0.6rem auto 0;
+  animation:drip 2.2s ease-in-out infinite;
+}
+@keyframes drip {
+  0%,100% { transform:translateY(0); opacity:0.25; }
+  50%      { transform:translateY(7px); opacity:0.7; }
+}
+
+/* ─── COLOPHON ─── */
+#colophon {
+  position:fixed; bottom:2.2rem; left:50%;
+  transform:translateX(-50%);
+  font-family:var(--latin); font-size:var(--xs);
+  letter-spacing:0.55em; text-transform:uppercase;
+  color:var(--bone-30); z-index:206; pointer-events:none;
+  opacity:0; transition:opacity 1.8s ease;
+  white-space:nowrap;
+}
+#colophon.show { opacity:1; }
+
+/* ═══════════════════════════════════════════════
+   ENTRY SCREEN
+═══════════════════════════════════════════════ */
+#entry {
+  position:fixed; inset:0;
+  background:var(--black);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:clamp(1.8rem,4vh,3rem);
+  z-index:300;
+}
+
+#ring-wrap {
+  width:clamp(90px,16vw,140px);
+  height:clamp(90px,16vw,140px);
+  position:relative;
+  display:flex; align-items:center; justify-content:center;
+}
+#ring {
+  position:absolute; inset:0;
+  border-radius:50%;
+  border:1px solid var(--bone-15);
+  animation:spin 16s linear infinite;
+  opacity:0; transition:opacity 1.5s ease;
+}
+#ring::before {
+  content:''; position:absolute;
+  width:3px; height:3px;
+  background:var(--bone-30); border-radius:50%;
+  top:-1.5px; left:50%; transform:translateX(-50%);
+}
+#ring.on { opacity:1; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+#e-sub {
+  font-family:var(--latin); font-size:0.6rem;
+  letter-spacing:0.6em; text-transform:uppercase;
+  color:var(--bone-30);
+  opacity:0; transition:opacity 1.5s ease 0.7s;
+}
+#e-sub.on { opacity:1; }
+
+#e-q {
+  font-size:var(--sm); font-weight:300;
+  color:var(--bone-60); letter-spacing:0.25em;
+  opacity:0; transition:opacity 1.5s ease 1.5s;
+}
+#e-q.on { opacity:1; }
+
+#e-btn {
+  border:1px solid var(--bone-30);
+  background:transparent; color:var(--bone-60);
+  padding:0.75rem 2.2rem;
+  font-family:var(--latin); font-size:0.75rem;
+  letter-spacing:0.5em; text-transform:uppercase;
+  cursor:pointer; border-radius:999px;
+  opacity:0;
+  transition:opacity 1.5s ease 2.2s,
+             border-color 0.4s ease,
+             color 0.4s ease,
+             box-shadow 0.4s ease;
+}
+#e-btn.on { opacity:1; }
+#e-btn:hover {
+  border-color:var(--blood);
+  color:var(--blood);
+  box-shadow:0 0 24px rgba(214,50,31,0.18);
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLL WRAP
+═══════════════════════════════════════════════ */
+#sw {
+  opacity:0; pointer-events:none;
+  transition:opacity 1s ease;
+}
+#sw.show { opacity:1; pointer-events:auto; }
+
+/* ─── TITLE SCREEN ─── */
+#ts {
+  min-height:100vh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:clamp(1.5rem,4vh,3.5rem);
+  padding:4rem 2rem;
+  position:relative; z-index:2;
+}
+.trow {
+  display:flex; align-items:baseline; gap:0.7em;
+  opacity:0; transform:translateY(28px);
+  will-change:opacity,transform;
+}
+.tmain {
+  font-size:var(--xl); font-weight:500;
+  line-height:1; letter-spacing:0.06em;
+}
+.tord {
+  font-size:var(--sm); font-weight:300;
+  color:var(--bone-60); letter-spacing:0.3em;
+  font-family:var(--latin); align-self:flex-end;
+  margin-bottom:0.25em;
+}
+
+/* ─── SCENES ─── */
+.scene {
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  padding:clamp(3rem,8vh,6rem) clamp(1.5rem,10vw,10rem);
+  position:relative; z-index:2; text-align:center;
+}
+.scene.br { min-height:45vh; }
+.c { max-width:860px; width:100%; }
+
+/* Act marker */
+.am {
+  position:absolute; top:2rem; left:50%;
+  transform:translateX(-50%);
+  font-family:var(--latin); font-size:0.58rem;
+  letter-spacing:0.55em; text-transform:uppercase;
+  color:var(--bone-15); pointer-events:none;
+}
+
+/* ─── ACT OPENER ─── */
+.aw {
+  font-size:var(--xxl); font-weight:500;
+  line-height:0.9; letter-spacing:0.04em;
+  opacity:0; will-change:opacity,filter,transform;
+}
+
+/* ─── GENERIC ATOMS ─── */
+.lmd {
+  display:block; font-size:var(--md); font-weight:300;
+  line-height:1.5; letter-spacing:0.08em;
+  opacity:0; transform:translateY(20px);
+  will-change:opacity,transform;
+}
+.llg {
+  display:block; font-size:var(--lg); font-weight:400;
+  line-height:1.2; letter-spacing:0.05em;
+  opacity:0; transform:translateY(22px);
+  will-change:opacity,transform;
+}
+.lsm {
+  display:block; font-size:var(--sm); font-weight:300;
+  line-height:2; letter-spacing:0.2em; color:var(--bone-60);
+  opacity:0; transform:translateY(16px);
+  will-change:opacity,transform;
+}
+.red { color:var(--blood); }
+.stack > * + * { margin-top:1.8rem; }
+.sxl  > * + * { margin-top:3.2rem; }
+
+/* Scene 3 — trio */
+.trio {
+  display:flex; align-items:center; justify-content:center;
+  gap:clamp(1rem,3.5vw,2.8rem);
+}
+.tdiv {
+  width:1px; height:clamp(1.2rem,2.5vw,2rem);
+  background:var(--bone-30); flex-shrink:0;
+  opacity:0;
+}
+.tw {
+  font-size:var(--md); font-weight:300;
+  letter-spacing:0.15em;
+  opacity:0; transform:translateY(18px);
+}
+
+/* Scene 4 climax */
+.s4not {
+  display:block; font-size:var(--md); font-weight:300;
+  letter-spacing:0.1em; color:var(--bone-60);
+  opacity:0; transform:translateY(14px);
+}
+.s4cli {
+  display:block; font-size:var(--lg); font-weight:400;
+  letter-spacing:0.12em; color:var(--blood);
+  opacity:0; transform:scale(0.85);
+  will-change:opacity,transform;
+}
+
+/* Scene 7 — offset */
+#s7a { text-align:left; padding-left:8%; }
+#s7b { text-align:right; padding-right:8%; }
+
+/* Scene 8 — grand climax */
+.s8a {
+  display:block; font-size:var(--sm); font-weight:300;
+  letter-spacing:0.22em; color:var(--bone-60);
+  opacity:0; transform:translateY(14px);
+}
+.s8b {
+  display:block; font-size:var(--lg); font-weight:400;
+  letter-spacing:0.06em; line-height:1.35;
+  opacity:0; transform:translateY(26px);
+}
+.s8r {
+  color:var(--blood);
+  text-shadow:0 0 35px rgba(214,50,31,0.4),
+              0 0 70px rgba(214,50,31,0.18);
+}
+
+/* Scene 9 */
+.s9b {
+  display:block; font-size:var(--md); font-weight:300;
+  letter-spacing:0.08em;
+  opacity:0; transform:translateX(-22px);
+  will-change:opacity,transform;
+}
+
+/* Scene 13 */
+.s13b {
+  display:block; font-size:var(--md); font-weight:300;
+  letter-spacing:0.08em; color:var(--bone-60);
+  opacity:0; transform:translateX(-28px);
+  will-change:opacity,transform;
+}
+
+/* Scene 14 coda */
+.coda {
+  font-size:var(--xxl); font-weight:500;
+  letter-spacing:0.06em; line-height:0.9;
+  opacity:0; transform:translateY(20px);
+  will-change:opacity,transform;
+}
+
+/* Scene 15 final */
+.fgw { opacity:0; transform:translateY(22px); }
+.fg  { display:flex; flex-direction:column; gap:0.4em; align-items:center; }
+.fgr { display:flex; gap:clamp(1.2rem,4.5vw,4rem); align-items:baseline; }
+.fgword { font-size:var(--lg); font-weight:500; letter-spacing:0.06em; }
+.fgnum  { font-size:var(--sm); font-weight:300; letter-spacing:0.3em;
+          color:var(--bone-60); font-family:var(--latin); }
+.fsub {
+  font-size:var(--sm); font-weight:300; letter-spacing:0.2em;
+  color:var(--bone-30); margin-top:3.5rem;
+  opacity:0; transform:translateY(12px);
+}
+</style>
+</head>
+<body>
+
+<!-- Fixed layers -->
+<div id="grain"><svg xmlns="http://www.w3.org/2000/svg">
+  <filter id="fn">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/>
+    <feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0"/>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#fn)"/>
+</svg></div>
+<div id="vig"></div>
+<div id="atm"></div>
+<div id="flash"></div>
+
+<div id="bar"></div>
+<div id="meta" aria-hidden="true">
+  <span id="meta-act">—</span>
+  <span id="meta-name">A Scroll · Three Acts</span>
+</div>
+<div id="controls">
+  <button class="cbtn" id="autoBtn">
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <span id="autoLabel">Auto</span>
+  </button>
+  <button class="cbtn" id="musicBtn">
+    <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+    <span id="musicLabel">Music</span>
+  </button>
+</div>
+<div id="hint">scroll</div>
+<div id="colophon">written in 2026</div>
+
+<!-- ══ ENTRY SCREEN ══ -->
+<div id="entry">
+  <div id="ring-wrap"><div id="ring"></div></div>
+  <div id="e-sub">A Scroll · Three Acts</div>
+  <div id="e-q">准备好了吗</div>
+  <button id="e-btn">进入</button>
+</div>
+
+<!-- ══ SCROLL WRAP ══ -->
+<div id="sw">
+
+  <!-- TITLE -->
+  <section id="ts">
+    <div class="trow" id="tr1"><span class="tmain">身体</span><span class="tord">第一</span></div>
+    <div class="trow" id="tr2"><span class="tmain">注意力</span><span class="tord">第二</span></div>
+    <div class="trow" id="tr3"><span class="tmain">语言</span><span class="tord">第三</span></div>
+  </section>
+
+  <!-- S1 -->
+  <section class="scene" data-s="1" data-dur="3000" data-act="I">
+    <div class="am">Act I · 身体</div>
+    <div class="c"><div class="aw" id="s1w">身体</div></div>
+  </section>
+
+  <!-- S2 -->
+  <section class="scene" data-s="2" data-dur="4000">
+    <div class="c stack">
+      <span class="lmd" id="s2a">你以为你在思考</span>
+      <span class="lmd red" id="s2b">其实你在用一具身体思考</span>
+    </div>
+  </section>
+
+  <!-- S3 -->
+  <section class="scene" data-s="3" data-dur="3000">
+    <div class="c">
+      <div class="trio">
+        <span class="tw" id="s3a">睡眠</span>
+        <div class="tdiv" id="s3d1"></div>
+        <span class="tw" id="s3b">运动</span>
+        <div class="tdiv" id="s3d2"></div>
+        <span class="tw" id="s3c">血糖</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- S4 (Act I climax) -->
+  <section class="scene" data-s="4" data-dur="5000">
+    <div class="c stack">
+      <span class="s4not" id="s4a">不是性格 · 不是意志力</span>
+      <span class="s4cli" id="s4b">是生理</span>
+    </div>
+  </section>
+
+  <!-- S5 breath -->
+  <section class="scene br" data-s="5" data-dur="1500"></section>
+
+  <!-- S6 -->
+  <section class="scene" data-s="6" data-dur="3000" data-act="II">
+    <div class="am">Act II · 注意力</div>
+    <div class="c"><div class="aw" id="s6w">注意力</div></div>
+  </section>
+
+  <!-- S7 -->
+  <section class="scene" data-s="7" data-dur="4000">
+    <div class="c stack">
+      <span class="lmd" id="s7a">你看到什么</span>
+      <span class="lmd" id="s7b">你就在变成什么</span>
+    </div>
+  </section>
+
+  <!-- S8 (grand climax) -->
+  <section class="scene" data-s="8" data-dur="7000">
+    <div class="c sxl">
+      <span class="s8a" id="s8a">你以为你在选择</span>
+      <span class="s8b" id="s8b">其实是你的注意力<br><span class="s8r">在替你选择</span></span>
+    </div>
+  </section>
+
+  <!-- S9 -->
+  <section class="scene" data-s="9" data-dur="4000">
+    <div class="c stack">
+      <span class="lmd" id="s9a">保护注意力</span>
+      <span class="s9b" id="s9b">就是保护<span class="red">你是谁</span></span>
+    </div>
+  </section>
+
+  <!-- S10 breath -->
+  <section class="scene br" data-s="10" data-dur="1500"></section>
+
+  <!-- S11 -->
+  <section class="scene" data-s="11" data-dur="3000" data-act="III">
+    <div class="am">Act III · 语言</div>
+    <div class="c"><div class="aw" id="s11w">语言</div></div>
+  </section>
+
+  <!-- S12 -->
+  <section class="scene" data-s="12" data-dur="4000">
+    <div class="c stack">
+      <span class="lmd" id="s12a">人类发明语言</span>
+      <span class="lmd" id="s12b">是为了<span class="red">切割</span>注意力</span>
+    </div>
+  </section>
+
+  <!-- S13 -->
+  <section class="scene" data-s="13" data-dur="5000">
+    <div class="c stack">
+      <span class="lmd" id="s13a">说清楚一件事</span>
+      <span class="s13b" id="s13b">它就能离开你 · 去找别人</span>
+    </div>
+  </section>
+
+  <!-- S14 (Act III coda) -->
+  <section class="scene" data-s="14" data-dur="4000">
+    <div class="c"><div class="coda" id="s14w">行动留痕</div></div>
+  </section>
+
+  <!-- S15 (final) -->
+  <section class="scene" data-s="15" data-dur="9000" style="flex-direction:column;">
+    <div class="c">
+      <div class="fgw" id="fgw">
+        <div class="fg">
+          <div class="fgr">
+            <span class="fgword">身体</span>
+            <span class="fgword">注意力</span>
+            <span class="fgword">语言</span>
+          </div>
+          <div class="fgr" style="gap:clamp(1.9rem,5.2vw,5rem);">
+            <span class="fgnum">第一</span>
+            <span class="fgnum" style="padding-left:0.5rem;">第二</span>
+            <span class="fgnum">第三</span>
+          </div>
+        </div>
+      </div>
+      <div class="fsub" id="fsub">如果看到这里，记得回到身体</div>
+    </div>
+  </section>
+
+  <section class="scene br" data-s="end" style="min-height:35vh;"></section>
+</div>
+
+<!-- BGM -->
+<audio id="bgm" loop preload="auto">
+  <source src="bgm.mp3" type="audio/mpeg">
+</audio>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+<script>
+'use strict';
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── helpers ── */
+const $ = id => document.getElementById(id);
+const atm = $('atm');
+
+function setAtm(mode) {
+  atm.className = mode;       // 'act1' | 'act2' | 'act3' | ''
+}
+
+function darkFlash(onMid) {
+  const fl = $('flash');
+  gsap.killTweensOf(fl);
+  gsap.fromTo(fl, { opacity:0 }, {
+    opacity: 0.88, duration: 0.18, ease: 'power2.in',
+    onComplete() {
+      if (onMid) onMid();
+      gsap.to(fl, { opacity:0, duration:0.6, ease:'power2.out' });
+    }
+  });
+}
+
+/* ── Web Audio ── */
+let actx = null;
+function ensureAudio() {
+  if (actx) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (AC) actx = new AC();
+}
+function resumeAudio() {
+  if (actx && actx.state === 'suspended') actx.resume();
+}
+
+function makeReverb(ctx, sec, decay) {
+  const sr = ctx.sampleRate, len = sr * sec;
+  const buf = ctx.createBuffer(2, len, sr);
+  for (let ch=0; ch<2; ch++) {
+    const d = buf.getChannelData(ch);
+    for (let i=0; i<len; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, decay);
+  }
+  const c = ctx.createConvolver(); c.buffer = buf; return c;
+}
+
+/* Act I: 200Hz + 100Hz, reverb 2s, vol 0.4 */
+function cueAct1() {
+  ensureAudio(); resumeAudio();
+  if (!actx) return;
+  const now = actx.currentTime;
+  const rev = makeReverb(actx, 2, 3);
+  const mg = actx.createGain();
+  mg.gain.setValueAtTime(1, now);
+  mg.gain.linearRampToValueAtTime(0, now+2.5);
+  rev.connect(mg); mg.connect(actx.destination);
+  [[200,0.4],[100,0.2]].forEach(([f,v]) => {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type='sine'; o.frequency.value=f;
+    g.gain.setValueAtTime(v,now);
+    g.gain.exponentialRampToValueAtTime(0.001,now+2.2);
+    o.connect(g).connect(rev);
+    o.start(now); o.stop(now+2.3);
+  });
+}
+
+/* Act II: 150Hz + plucked string synth, reverb 3s, vol 0.5 */
+function cueAct2() {
+  ensureAudio(); resumeAudio();
+  if (!actx) return;
+  const now = actx.currentTime;
+  const rev = makeReverb(actx, 3, 4);
+  const mg = actx.createGain();
+  mg.gain.setValueAtTime(1, now);
+  mg.gain.linearRampToValueAtTime(0, now+3.8);
+  rev.connect(mg); mg.connect(actx.destination);
+
+  // 150Hz sine
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type='sine'; o.frequency.value=150;
+  g.gain.setValueAtTime(0.5,now);
+  g.gain.exponentialRampToValueAtTime(0.001,now+3.2);
+  o.connect(g).connect(rev);
+  o.start(now); o.stop(now+3.3);
+
+  // Pluck: noise through bandpass
+  const bufSz = Math.floor(actx.sampleRate * 0.5);
+  const nb = actx.createBuffer(1, bufSz, actx.sampleRate);
+  const nd = nb.getChannelData(0);
+  for (let i=0; i<bufSz; i++) nd[i] = (Math.random()*2-1) * Math.pow(1-i/bufSz, 7);
+  const ns = actx.createBufferSource(); ns.buffer = nb;
+  const bp = actx.createBiquadFilter();
+  bp.type='bandpass'; bp.frequency.value=440; bp.Q.value=28;
+  const ng2 = actx.createGain();
+  ng2.gain.setValueAtTime(0.22,now);
+  ng2.gain.linearRampToValueAtTime(0,now+0.9);
+  ns.connect(bp).connect(ng2).connect(rev);
+  ns.start(now+0.08);
+}
+
+/* Act III: C4 (262Hz) piano harmonics, vol 0.3 */
+function cueAct3() {
+  ensureAudio(); resumeAudio();
+  if (!actx) return;
+  const now = actx.currentTime;
+  const mg = actx.createGain();
+  mg.gain.setValueAtTime(1, now);
+  mg.connect(actx.destination);
+  [[262,1.0],[524,0.42],[786,0.16],[1048,0.06]].forEach(([f,v]) => {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type='sine'; o.frequency.value=f;
+    g.gain.setValueAtTime(v*0.3, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now+2.3);
+    o.connect(g).connect(mg);
+    o.start(now); o.stop(now+2.4);
+  });
+}
+
+/* ── ENTRY SCREEN ── */
+const entryEl = $('entry');
+setTimeout(() => $('ring').classList.add('on'), 300);
+setTimeout(() => $('e-sub').classList.add('on'), 900);
+setTimeout(() => $('e-q').classList.add('on'), 1700);
+setTimeout(() => $('e-btn').classList.add('on'), 2500);
+
+let booted = false;
+
+$('e-btn').addEventListener('click', () => {
+  if (booted) return;
+  booted = true;
+  ensureAudio();
+
+  // ring expand
+  gsap.to($('ring'), { scale:30, opacity:0, duration:1.0, ease:'power2.in' });
+  gsap.to([$('e-sub'),$('e-q'),$('e-btn')], { opacity:0, duration:0.35, stagger:0.08 });
+
+  setTimeout(() => {
+    entryEl.style.display = 'none';
+    const sw = $('sw');
+    sw.classList.add('show');
+
+    // Stagger title rows in
+    gsap.to(['#tr1','#tr2','#tr3'], {
+      opacity:1, y:0,
+      duration:1.0, stagger:1.2, ease:'power2.out',
+      onComplete() {
+        // hold for 5s then fade out
+        setTimeout(() => {
+          gsap.to(['#tr1','#tr2','#tr3'], {
+            opacity:0, duration:1.3, ease:'power2.inOut',
+            onComplete() {
+              $('meta').classList.add('show');
+              $('controls').classList.add('show');
+              $('hint').classList.add('show');
+            }
+          });
+        }, 5000);
+      }
+    });
+
+    // Boot Lenis + ScrollTrigger
+    initLenis();
+    setTimeout(() => { buildTriggers(); ScrollTrigger.refresh(); }, 400);
+  }, 850);
+});
+
+/* ── LENIS ── */
+let lenis;
+function initLenis() {
+  lenis = new Lenis({
+    duration: 1.5,
+    easing: t => Math.min(1, 1.001 - Math.pow(2, -10*t)),
+    smoothWheel: true, smoothTouch: false, wheelMultiplier: 0.85
+  });
+  (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
+  lenis.on('scroll', ScrollTrigger.update);
+  lenis.on('scroll', ({ scroll, limit }) => {
+    $('bar').style.width = (limit > 0 ? scroll/limit*100 : 0) + '%';
+  });
+  lenis.on('scroll', hideHint);
+  window.addEventListener('wheel', () => { if(isAuto) stopAuto(); }, { passive:true });
+  window.addEventListener('touchmove', () => { if(isAuto) stopAuto(); }, { passive:true });
+}
+
+let hintGone = false;
+function hideHint() {
+  if (!hintGone) { hintGone=true; $('hint').classList.remove('show'); }
+}
+
+/* ── ACT ATMOSPHERE SETUP ── */
+const ACT_INFO = {
+  I:   { act:'ACT I',   name:'身体 · Body',      atm:'act1' },
+  II:  { act:'ACT II',  name:'注意力 · Attention', atm:'act2' },
+  III: { act:'ACT III', name:'语言 · Language',   atm:'act3' },
+};
+
+function setMeta(act, name) {
+  $('meta-act').textContent = act;
+  $('meta-name').textContent = name;
+}
+
+/* ── SCROLL TRIGGERS ── */
+function buildTriggers() {
+
+  /* atmosphere brackets */
+  const atmMap = [
+    { sel:'[data-s="1"]', in:'act1', back:'' },
+    { sel:'[data-s="6"]', in:'act2', back:'act1' },
+    { sel:'[data-s="11"]', in:'act3', back:'act2' },
+    { sel:'[data-s="15"]', in:'', back:'act3' },
+  ];
+  atmMap.forEach(({ sel, in:inn, back }) => {
+    ScrollTrigger.create({
+      trigger: document.querySelector(sel),
+      start: 'top 65%',
+      onEnter:     () => setAtm(inn),
+      onEnterBack: () => setAtm(back),
+    });
+  });
+
+  /* act meta labels */
+  Object.entries(ACT_INFO).forEach(([key, info]) => {
+    const el = document.querySelector(`[data-act="${key}"]`);
+    if (!el) return;
+    ScrollTrigger.create({
+      trigger: el, start: 'top 65%',
+      onEnter() { setMeta(info.act, info.name); },
+      onEnterBack() { setMeta(info.act, info.name); },
+    });
+  });
+
+  /* ── scene animations ── */
+
+  /* S1 — scale up from below */
+  stAnim('[data-s="1"]',
+    gsap.fromTo('#s1w',
+      { opacity:0, y:40 },
+      { opacity:1, y:0, duration:1.1, ease:'power3.out', paused:true }
+    )
+  );
+
+  /* S2 */
+  stTimeline('[data-s="2"]', tl => {
+    tl.to('#s2a', { opacity:1, y:0, duration:0.9, ease:'power2.out' })
+      .to('#s2b', { opacity:1, y:0, duration:0.9, ease:'power2.out' }, '+=0.75');
+  });
+
+  /* S3 */
+  stTimeline('[data-s="3"]', tl => {
+    tl.to(['#s3a','#s3b','#s3c'], { opacity:1, y:0, duration:0.8, stagger:0.18, ease:'power2.out' })
+      .to(['#s3d1','#s3d2'], { opacity:1, duration:0.5 }, 0.2);
+  });
+
+  /* S4 — climax, audio cue */
+  stTimeline('[data-s="4"]', tl => {
+    tl.to('#s4a', { opacity:1, y:0, duration:0.9, ease:'power2.out' })
+      .to('#s4b', { opacity:1, scale:1, duration:1.05, ease:'back.out(1.5)' }, '+=0.6')
+      .add(() => cueAct1(), '-=0.55');
+  });
+
+  /* S6 — blur to sharp */
+  stAnim('[data-s="6"]',
+    gsap.fromTo('#s6w',
+      { opacity:0, filter:'blur(10px)' },
+      { opacity:1, filter:'blur(0px)', duration:1.6, ease:'power2.out', paused:true }
+    )
+  );
+
+  /* S7 */
+  stTimeline('[data-s="7"]', tl => {
+    tl.to('#s7a', { opacity:1, y:0, duration:0.9, ease:'power2.out' })
+      .to('#s7b', { opacity:1, y:0, duration:0.9, ease:'power2.out' }, '+=0.5');
+  });
+
+  /* S8 — dark flash + grand cue */
+  stTimeline('[data-s="8"]', tl => {
+    tl.to('#s8a', { opacity:1, y:0, duration:0.9, ease:'power2.out' })
+      .add(() => {
+        setTimeout(() => {
+          darkFlash(() => {
+            gsap.to('#s8b', { opacity:1, y:0, duration:1.3, ease:'power2.out' });
+            cueAct2();
+          });
+        }, 1500);
+      }, '+=0.2');
+  });
+
+  /* S9 */
+  stTimeline('[data-s="9"]', tl => {
+    tl.to('#s9a', { opacity:1, y:0, duration:0.9, ease:'power2.out' })
+      .to('#s9b', { opacity:1, x:0, duration:1.0, ease:'power2.out' }, '+=0.55');
+  });
+
+  /* S11 — gentle fade */
+  stAnim('[data-s="11"]',
+    gsap.fromTo('#s11w',
+      { opacity:0, y:20 },
+      { opacity:1, y:0, duration:1.5, ease:'power2.out', paused:true }
+    )
+  );
+
+  /* S12 */
+  stTimeline('[data-s="12"]', tl => {
+    tl.to('#s12a', { opacity:1, y:0, duration:0.9, ease:'power2.out' })
+      .to('#s12b', { opacity:1, y:0, duration:0.9, ease:'power2.out' }, '+=0.55');
+  });
+
+  /* S13 */
+  stTimeline('[data-s="13"]', tl => {
+    tl.to('#s13a', { opacity:1, y:0, duration:0.9, ease:'power2.out' })
+      .to('#s13b', { opacity:1, x:0, duration:1.15, ease:'power2.out' }, '+=0.65');
+  });
+
+  /* S14 — coda + C4 piano */
+  stTimeline('[data-s="14"]', tl => {
+    tl.to('#s14w', { opacity:1, y:0, duration:1.1, ease:'power2.out' })
+      .add(() => cueAct3(), '-=0.7');
+  });
+
+  /* S15 — final */
+  stTimeline('[data-s="15"]', tl => {
+    tl.to('#fgw', { opacity:1, y:0, duration:1.2, ease:'power2.out' })
+      .to('#fsub', { opacity:1, y:0, duration:1.0, ease:'power2.out' }, '+=4.5')
+      .add(() => {
+        setTimeout(() => $('colophon').classList.add('show'), 7000);
+      });
+  });
+}
+
+function stAnim(selector, anim) {
+  ScrollTrigger.create({
+    trigger: document.querySelector(selector),
+    start: 'top 68%',
+    toggleActions: 'play none none reverse',
+    animation: anim,
+  });
+}
+
+function stTimeline(selector, builder) {
+  const tl = gsap.timeline({ paused: true });
+  builder(tl);
+  ScrollTrigger.create({
+    trigger: document.querySelector(selector),
+    start: 'top 68%',
+    toggleActions: 'play none none reverse',
+    animation: tl,
+  });
+}
+
+/* ── AUTO-PLAY ── */
+let isAuto = false, autoTimer = null, sceneIdx = 0, musicOn = false;
+const bgm = $('bgm');
+
+function getAllScenes() {
+  return Array.from(document.querySelectorAll('[data-s]:not([data-s="end"])'));
+}
+
+function getActiveIdx() {
+  const list = getAllScenes(), vh = window.innerHeight;
+  let best=0, bestD=Infinity;
+  list.forEach((el,i) => {
+    const r = el.getBoundingClientRect();
+    const d = Math.abs(r.top + r.height/2 - vh/2);
+    if (d<bestD) { bestD=d; best=i; }
+  });
+  return best;
+}
+
+function autoAdvance() {
+  if (!isAuto) return;
+  const list = getAllScenes();
+  sceneIdx = Math.max(sceneIdx, getActiveIdx());
+  const next = sceneIdx + 1;
+  if (next >= list.length) { stopAuto(); return; }
+  const dwell = parseInt(list[sceneIdx].dataset.dur, 10) || 3000;
+  autoTimer = setTimeout(() => {
+    if (!isAuto) return;
+    sceneIdx = next;
+    lenis.scrollTo(list[next], { duration:1.0, easing:t=>1-Math.pow(1-t,3) });
+    autoAdvance();
+  }, dwell);
+}
+
+function startAuto() {
+  isAuto = true;
+  $('autoBtn').classList.add('on');
+  $('autoLabel').textContent = 'Pause';
+  $('autoBtn').querySelector('svg').innerHTML = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+  sceneIdx = getActiveIdx();
+  if (!musicOn) toggleMusic();
+  autoAdvance();
+}
+
+function stopAuto() {
+  isAuto = false;
+  clearTimeout(autoTimer);
+  $('autoBtn').classList.remove('on');
+  $('autoLabel').textContent = 'Auto';
+  $('autoBtn').querySelector('svg').innerHTML = '<path d="M8 5v14l11-7z"/>';
+}
+
+function toggleMusic() {
+  ensureAudio(); resumeAudio();
+  musicOn = !musicOn;
+  if (musicOn) {
+    bgm.play().catch(()=>{});
+    $('musicBtn').classList.add('on');
+    $('musicLabel').textContent = 'Music ✓';
+  } else {
+    bgm.pause();
+    $('musicBtn').classList.remove('on');
+    $('musicLabel').textContent = 'Music';
+  }
+}
+
+$('autoBtn').addEventListener('click', () => { if (!lenis) return; isAuto ? stopAuto() : startAuto(); });
+$('musicBtn').addEventListener('click', toggleMusic);
+</script>
+</body>
+</html>

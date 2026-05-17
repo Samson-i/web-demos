@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>身体第一，注意力第二，语言第三</title>
+<meta name="description" content="一部关于错位的网页电影：身体—注意力—语言。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700;900&family=JetBrains+Mono:wght@300;500&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --ink:#080705;
+  --bone:#efe9d8;
+  --blood:#d6321f;
+  --ash:#554f48;
+  --dim:#1a1815;
+  --fog:#2a2520;
+  --S:'Noto Serif SC','Songti SC','STSong',Georgia,serif;
+  --M:'JetBrains Mono','Courier New',monospace;
+  --accent:var(--blood);
+  --ease:cubic-bezier(.18,1.05,.35,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+html,body{
+  background:var(--ink);
+  color:var(--bone);
+  font-family:var(--S);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+}
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+}
+::selection{background:rgba(214,50,31,.6);color:var(--bone)}
+
+/* ============ FIXED AMBIENT LAYERS ============ */
+#cv{position:fixed;inset:0;z-index:1;pointer-events:none}
+#grain{
+  position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.07;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:256px;
+  animation:grain .12s steps(1) infinite;
+}
+@keyframes grain{
+  0%{background-position:0 0}
+  17%{background-position:-62px -38px}
+  33%{background-position:40px -74px}
+  50%{background-position:-90px 28px}
+  67%{background-position:58px 56px}
+  83%{background-position:-30px -88px}
+}
+#vig{
+  position:fixed;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,transparent 26%,rgba(0,0,0,.55) 78%,rgba(0,0,0,.88) 100%);
+}
+.bgc{
+  position:fixed;inset:0;z-index:4;pointer-events:none;
+  transition:opacity 1.4s ease;
+}
+#bgc-b{opacity:0}
+
+/* ============ CURSOR ORBIT ============ */
+#orbit{
+  position:fixed;inset:0;z-index:14;pointer-events:none;
+  --ix:50vw;--iy:50vh;
+  transition:opacity .6s ease;
+}
+#core{
+  position:absolute;left:var(--ix);top:var(--iy);
+  width:clamp(46px,5.4vw,72px);height:clamp(46px,5.4vw,72px);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:
+    radial-gradient(circle at 36% 30%,rgba(239,233,216,.82),rgba(239,233,216,.16) 22%,transparent 44%),
+    radial-gradient(circle,rgba(214,50,31,.78) 0 8%,rgba(214,50,31,.18) 9% 26%,transparent 48%);
+  box-shadow:0 0 22px rgba(214,50,31,.32),0 0 90px rgba(214,50,31,.12);
+  mix-blend-mode:screen;
+  opacity:.55;
+  transition:opacity .4s ease;
+}
+#core::before,#core::after{
+  content:"";position:absolute;inset:-22%;border-radius:50%;
+  border:1px solid rgba(239,233,216,.18);
+  transform:rotate(34deg) scaleX(1.62);
+}
+#core::after{
+  inset:-38%;
+  border-color:rgba(214,50,31,.18);
+  transform:rotate(-28deg) scaleX(1.94);
+}
+#crosshair{
+  position:absolute;left:var(--ix);top:var(--iy);
+  width:1px;height:1px;opacity:.42;
+  transition:opacity .4s ease;
+}
+#crosshair::before,#crosshair::after{
+  content:"";position:absolute;background:rgba(239,233,216,.28);
+}
+#crosshair::before{left:-58px;right:-58px;top:0;height:1px}
+#crosshair::after{top:-58px;bottom:-58px;left:0;width:1px}
+body.idle #core{opacity:.18}
+body.idle #crosshair{opacity:.16}
+
+/* ============ ACT BADGE ============ */
+#badge{
+  position:fixed;top:1.5rem;right:1.8rem;z-index:32;
+  font-family:var(--M);font-size:.6rem;letter-spacing:.38em;
+  color:var(--ash);text-transform:uppercase;
+  opacity:0;transition:opacity 1.1s ease;
+  pointer-events:none;
+}
+#badge.show{opacity:.7}
+
+/* ============ STAGE ============ */
+#stage{
+  position:relative;z-index:20;
+  will-change:transform;
+  transition:transform .35s ease-out;
+}
+
+/* ============ TYPOGRAPHY ============ */
+.Td{font-size:clamp(5rem,18vw,16rem);font-weight:900;line-height:.86;letter-spacing:-.01em}
+.Th{font-size:clamp(3rem,9.5vw,9rem);font-weight:900;line-height:.96;letter-spacing:.04em}
+.Tb{font-size:clamp(2.2rem,6.5vw,6rem);font-weight:900;line-height:1.06;letter-spacing:.04em}
+.Tm{font-size:clamp(1.15rem,2.8vw,2.4rem);font-weight:300;line-height:1.72;letter-spacing:.10em}
+.Ts{font-size:clamp(.92rem,1.8vw,1.45rem);font-weight:300;line-height:1.85;letter-spacing:.08em}
+.Tn{font-family:var(--M);font-size:clamp(.6rem,1.05vw,.78rem);letter-spacing:.24em;line-height:2.2}
+.Ti{font-family:var(--M);font-size:clamp(.5rem,.78vw,.62rem);letter-spacing:.32em;line-height:2.4;color:var(--ash);text-transform:uppercase}
+.blood{color:var(--blood)}
+.ash{color:var(--ash)}
+.bone{color:var(--bone)}
+.glow-b{text-shadow:0 0 28px rgba(214,50,31,.5),0 0 72px rgba(214,50,31,.2)}
+.glow-w{text-shadow:0 0 32px rgba(239,233,216,.22)}
+.breathe{animation:breathe 3.6s ease-in-out infinite 1.4s}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+/* ============ FX ENTRANCE ============ */
+.fx{
+  opacity:0;
+  transform:translateY(18px);
+  transition:
+    opacity .85s var(--ease) var(--d,0s),
+    transform .95s var(--ease) var(--d,0s),
+    filter .85s ease var(--d,0s);
+  will-change:opacity,transform;
+}
+.scene.in .fx{opacity:1;transform:none}
+.fx.scale{transform:translateY(18px) scale(.82)}
+.scene.in .fx.scale{transform:none}
+.fx.blast{transform:scale(2.4);filter:blur(14px)}
+.scene.in .fx.blast{transform:scale(1);filter:blur(0)}
+.fx.slideX{transform:translateX(-32px)}
+.scene.in .fx.slideX{transform:translateX(0)}
+.scene.in .rule.fx{opacity:.4}
+
+/* ============ SCENE BASE ============ */
+.scene{
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:clamp(3rem,8vw,7rem) clamp(1.5rem,6vw,5rem);
+  isolation:isolate;
+  overflow:hidden;
+}
+.rule{
+  width:1px;background:var(--ash);opacity:.4;
+  align-self:center;height:1.4rem;margin:.4rem 0;
+}
+
+/* ============ MODE · WHISPER ============ */
+.scene.whisper{
+  align-items:center;
+  text-align:center;
+  gap:1.6rem;
+}
+.scene.whisper .h{
+  font-size:clamp(1.7rem,5vw,4.6rem);
+  font-weight:300;
+  letter-spacing:.18em;
+  line-height:1.48;
+}
+.scene.whisper .sub{
+  font-size:clamp(.95rem,1.9vw,1.5rem);
+  color:var(--ash);
+  max-width:42ch;
+  line-height:1.9;
+  letter-spacing:.1em;
+  font-weight:300;
+}
+
+/* ============ MODE · TITAN ============ */
+.scene.titan{
+  align-items:center;
+  text-align:center;
+  gap:1rem;
+}
+.scene.titan .tag{
+  font-family:var(--M);
+  font-size:clamp(.62rem,1vw,.78rem);
+  letter-spacing:.42em;
+  color:var(--ash);
+  text-transform:uppercase;
+  margin-bottom:1.2rem;
+}
+.scene.titan .h{
+  font-size:clamp(5rem,17vw,15rem);
+  font-weight:900;
+  line-height:.88;
+  letter-spacing:.04em;
+  color:var(--accent);
+  text-shadow:0 0 42px rgba(214,50,31,.32);
+}
+.scene.titan .sub{
+  font-size:clamp(1.1rem,2.6vw,2.2rem);
+  font-weight:300;
+  line-height:1.6;
+  letter-spacing:.18em;
+  margin-top:.4rem;
+  max-width:36ch;
+}
+
+/* ============ MODE · SPLIT ============ */
+.scene.split{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr);
+  gap:clamp(1.4rem,5vw,5rem);
+  align-items:center;
+}
+.scene.split .left,
+.scene.split .right{
+  display:flex;flex-direction:column;
+  gap:.6rem;
+}
+.scene.split .left{text-align:right}
+.scene.split .right{text-align:left}
+.scene.split .label{
+  font-family:var(--M);
+  font-size:clamp(.58rem,.95vw,.74rem);
+  letter-spacing:.32em;
+  color:var(--ash);
+  text-transform:uppercase;
+}
+.scene.split .h{
+  font-size:clamp(2rem,5.6vw,4.4rem);
+  font-weight:900;
+  line-height:1.04;
+  letter-spacing:.06em;
+  margin:.3rem 0 .5rem;
+}
+.scene.split .right .h{color:var(--blood)}
+.scene.split .body-line{
+  font-size:clamp(.95rem,1.8vw,1.4rem);
+  font-weight:300;
+  line-height:1.85;
+  letter-spacing:.08em;
+}
+.scene.split .body-line strong{font-weight:900;letter-spacing:.04em}
+.scene.split .micro{
+  font-family:var(--M);
+  font-size:clamp(.56rem,.95vw,.72rem);
+  color:var(--ash);
+  letter-spacing:.22em;
+  margin-top:.5rem;
+  line-height:2.1;
+}
+.scene.split .cutline{
+  width:1px;
+  height:clamp(40vh,52vh,60vh);
+  background:linear-gradient(transparent,rgba(239,233,216,.32),transparent);
+  justify-self:center;
+}
+
+/* ============ MODE · DUAL (multi-row) ============ */
+.scene.dual{align-items:center;text-align:center;gap:.9rem}
+.scene.dual .row{
+  display:inline-flex;align-items:baseline;gap:clamp(.9rem,2.5vw,1.8rem);
+  font-size:clamp(1.5rem,4.2vw,3.2rem);
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.scene.dual .row .label{color:var(--blood);min-width:6ch;text-align:right}
+.scene.dual .row .verb{color:var(--bone);font-weight:300;letter-spacing:.12em}
+
+/* ============ MODE · TRIPLE (cascading lines) ============ */
+.scene.triple{align-items:center;text-align:center;gap:.95rem}
+.scene.triple .line{
+  font-size:clamp(1.4rem,4vw,3.2rem);
+  font-weight:300;
+  line-height:1.4;
+  letter-spacing:.1em;
+}
+.scene.triple .line.blood{font-weight:900;color:var(--blood);letter-spacing:.16em}
+.scene.triple .line em{font-style:normal;color:var(--blood);font-weight:900;padding:0 .12em}
+
+/* ============ MODE · BODY (default narrative) ============ */
+.scene.body{align-items:center;text-align:center;gap:1.1rem}
+.scene.body .micro{
+  font-family:var(--M);
+  font-size:clamp(.6rem,1vw,.78rem);
+  letter-spacing:.32em;
+  color:var(--ash);
+  text-transform:uppercase;
+}
+.scene.body .h{
+  font-size:clamp(2.2rem,6.4vw,5.2rem);
+  font-weight:900;
+  line-height:1.1;
+  letter-spacing:.05em;
+}
+.scene.body .h .blood{font-weight:900}
+.scene.body .sub{
+  font-size:clamp(1rem,2.1vw,1.65rem);
+  font-weight:300;
+  line-height:1.85;
+  color:var(--bone);
+  max-width:44ch;
+  letter-spacing:.08em;
+}
+
+/* ============ MODE · FOOTNOTE (small transition card) ============ */
+.scene.footnote{
+  min-height:72vh;
+  align-items:center;
+  text-align:center;
+  justify-content:center;
+  gap:1rem;
+}
+.scene.footnote .pill{
+  font-family:var(--M);
+  font-size:clamp(.66rem,1.2vw,.92rem);
+  letter-spacing:.34em;
+  color:var(--ash);
+  border:1px solid rgba(239,233,216,.14);
+  padding:.7rem 1.4rem;
+  text-transform:uppercase;
+}
+.scene.footnote .formula{
+  font-family:var(--M);
+  font-size:clamp(1rem,2.4vw,1.8rem);
+  letter-spacing:.22em;
+  color:var(--bone);
+  margin-top:1.4rem;
+  font-weight:500;
+}
+.scene.footnote .formula .arrow{
+  color:var(--blood);margin:0 .6em;
+}
+.scene.footnote .note{
+  font-size:clamp(.95rem,1.8vw,1.35rem);
+  color:var(--ash);
+  line-height:1.95;
+  max-width:46ch;
+  margin-top:1rem;
+  font-weight:300;
+  letter-spacing:.08em;
+}
+
+/* ============ DECORATION ============ */
+.deco-vert{
+  position:absolute;
+  writing-mode:vertical-rl;text-orientation:upright;
+  font-family:var(--S);letter-spacing:.45em;color:var(--ash);
+  font-size:clamp(.62rem,.95vw,.82rem);opacity:0;
+  pointer-events:none;
+  transition:opacity 1.6s ease var(--d,.5s);
+}
+.scene.in .deco-vert{opacity:.42}
+
+.deco-bg{
+  position:absolute;
+  font-family:var(--S);font-weight:900;line-height:.8;
+  pointer-events:none;
+  user-select:none;
+  opacity:0;
+  transition:opacity 2.4s ease var(--d,.4s);
+  z-index:-1;
+}
+.scene.in .deco-bg{opacity:1}
+
+.deco-scan{
+  position:absolute;left:0;right:0;height:3px;top:0;
+  background:linear-gradient(transparent,rgba(239,233,216,.06),transparent);
+  pointer-events:none;
+  animation:scanLine 6s linear infinite;
+  opacity:0;
+  transition:opacity 1.4s ease 1s;
+}
+.scene.in .deco-scan{opacity:1}
+@keyframes scanLine{from{top:-3px}to{top:100%}}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:760px){
+  .scene.split{
+    grid-template-columns:1fr;
+    gap:2.4rem;
+  }
+  .scene.split .cutline{
+    width:60%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(239,233,216,.3),transparent);
+    justify-self:center;
+  }
+  .scene.split .left,
+  .scene.split .right{text-align:center;align-items:center}
+  .scene.dual .row{flex-direction:column;gap:.3rem}
+  .scene.dual .row .label{min-width:auto;text-align:center}
+  #orbit{opacity:0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.2s !important}
+  .breathe{animation:none}
+  #grain{animation:none}
+  .deco-scan{animation:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+<div id="grain"></div>
+<div id="vig"></div>
+<div id="bgc-a" class="bgc"></div>
+<div id="bgc-b" class="bgc"></div>
+<div id="orbit">
+  <div id="core"></div>
+  <div id="crosshair"></div>
+</div>
+<div id="badge"></div>
+
+<main id="stage">
+
+  <!-- ========== 开篇 · whisper ========== -->
+  <section class="scene whisper"
+           data-bg="radial-gradient(ellipse at 50% 56%, rgba(28,26,22,.85), var(--ink) 70%)"
+           data-accent="bone"
+           data-act="">
+    <p class="Ti fx" style="--d:0s">// 这 是 一 部 关 于 错 位 的 影 片</p>
+    <h1 class="h fx" style="--d:.7s">你 以 为 是 大 脑<br>在 主 导 你 ？</h1>
+    <p class="sub fx" style="--d:1.8s">不是。是身体先反应，大脑再叙事。</p>
+  </section>
+
+  <!-- ========== I-0 · ACT I 标题 · titan ========== -->
+  <section class="scene titan"
+           data-bg="radial-gradient(ellipse at 50% 48%, rgba(214,50,31,.12), var(--ink) 62%)"
+           data-accent="blood"
+           data-act="ACT I · 身体">
+    <p class="tag fx" style="--d:0s">A C T  I</p>
+    <h2 class="h fx scale" style="--d:.5s">身 体</h2>
+    <p class="sub fx ash" style="--d:1.3s">你最大的理性</p>
+    <span class="deco-vert" style="right:5%;top:50%;transform:translateY(-50%);--d:1.6s">BODY · 身 体 是 你 最 大 的 能 量 源</span>
+  </section>
+
+  <!-- ========== I-1 · 在你"想"之前 · whisper ========== -->
+  <section class="scene whisper"
+           data-bg="radial-gradient(ellipse at 36% 50%, rgba(239,233,216,.05), var(--ink) 68%)"
+           data-accent="bone"
+           data-act="ACT I · 身体">
+    <p class="Ti fx" style="--d:0s">// I . 0 1　·　身 体 的 优 先 权</p>
+    <h2 class="h fx" style="--d:.6s">在 你 "想" 之 前<br>身 体 已 经 替 你 下 过 判 断</h2>
+  </section>
+
+  <!-- ========== I-2 · 90% · titan ========== -->
+  <section class="scene titan"
+           data-bg="radial-gradient(ellipse at 54% 50%, rgba(214,50,31,.1), var(--ink) 58%)"
+           data-accent="blood"
+           data-act="ACT I · 身体">
+    <span class="deco-bg" style="left:52%;top:54%;transform:translate(-50%,-50%);font-size:48vw;color:rgba(214,50,31,.025)">90</span>
+    <p class="sub fx" style="--d:0s;margin-top:0;margin-bottom:1.4rem">你 以 为 自 己 在 情 绪 波 动</p>
+    <h2 class="h fx scale glow-b breathe" style="--d:.6s">9 0 %</h2>
+    <p class="sub fx ash" style="--d:1.6s">跟 血 糖 有 关</p>
+    <p class="Tn fx ash" style="--d:2.4s;margin-top:1.4rem">// 你 不 是 一 个 纯 精 神　·　你 是 一 个 生 化 体</p>
+  </section>
+
+  <!-- ========== I-3 · 多巴胺 + 睾酮 · dual ========== -->
+  <section class="scene dual"
+           data-bg="linear-gradient(118deg, rgba(214,50,31,.085), var(--ink) 52%, rgba(239,233,216,.04))"
+           data-accent="blood"
+           data-act="ACT I · 身体">
+    <p class="Ti fx" style="--d:0s">// 双 轮 驱 动 模 型</p>
+    <div class="row fx" style="--d:.5s">
+      <span class="label">多 巴 胺</span>
+      <span class="verb">让 你 向 外 探 索</span>
+    </div>
+    <span class="rule fx" style="--d:1s"></span>
+    <div class="row fx" style="--d:1.3s">
+      <span class="label">睾　　酮</span>
+      <span class="verb">让 你 觉 得 · 彼 可 取 而 代 之</span>
+    </div>
+    <p class="Tn fx ash" style="--d:2.4s;margin-top:1.6rem">// 内 耗 的 本 质 ：双 激 素 不 足 · 能 量 向 内 攻 击 自 己</p>
+  </section>
+
+  <!-- ========== I-4 · 看见世界 · triple ========== -->
+  <section class="scene triple"
+           data-bg="radial-gradient(ellipse at 50% 50%, rgba(28,26,22,.85), var(--ink) 72%)"
+           data-accent="bone"
+           data-act="ACT I · 身体">
+    <p class="line fx" style="--d:0s">一 个 让 你 <em>看 见</em> 世 界</p>
+    <p class="line fx" style="--d:.9s">一 个 让 看 见 世 界 的 你</p>
+    <span class="rule fx" style="--d:1.6s;height:1.6rem"></span>
+    <p class="line fx blood" style="--d:1.9s">不 是 敬 畏　·　不 是 恐 惧</p>
+    <p class="line fx" style="--d:2.6s">是 兴 奋 和 渴 望</p>
+  </section>
+
+  <!-- ========== I-5 · 生存型 vs 成长型 · split ========== -->
+  <section class="scene split"
+           data-bg="linear-gradient(90deg, rgba(239,233,216,.045), var(--ink) 50%, rgba(214,50,31,.085))"
+           data-accent="blood"
+           data-act="ACT I · 身体">
+    <div class="left">
+      <p class="label fx" style="--d:0s">S U R V I V A L</p>
+      <h3 class="h fx" style="--d:.3s">生 存 型<br>吃 苦</h3>
+      <p class="body-line fx" style="--d:.9s">被动 · 重复 · 体力<br>确定性 <strong>极 高</strong><br>成长性 <strong class="ash">极 低</strong></p>
+      <p class="micro fx" style="--d:1.5s">// 苦 都 流 向 了<br>// 太 能 吃 苦 的 人</p>
+    </div>
+    <div class="cutline fx" style="--d:.4s"></div>
+    <div class="right">
+      <p class="label fx" style="--d:.3s">G R O W T H</p>
+      <h3 class="h fx" style="--d:.6s">成 长 型<br>吃 苦</h3>
+      <p class="body-line fx" style="--d:1.2s">主动 · 迭代 · 认知<br>确定性 <strong class="ash">极 低</strong><br>成长性 <strong style="color:var(--blood)">极 高</strong></p>
+      <p class="micro fx" style="--d:1.8s">// 短 期 痛 苦<br>// 长 期 指 数 回 报</p>
+    </div>
+  </section>
+
+  <!-- ========== I-6 · DMN · body ========== -->
+  <section class="scene body"
+           data-bg="radial-gradient(ellipse at 28% 56%, rgba(239,233,216,.055), var(--ink) 65%)"
+           data-accent="bone"
+           data-act="ACT I · 身体">
+    <p class="micro fx" style="--d:0s">// I . 0 6　·　默 认 模 式 网 络</p>
+    <h2 class="h fx" style="--d:.5s">智 慧 不 在 大 脑 里<br>在 你 的 <span class="blood">跑 步</span> 里</h2>
+    <span class="rule fx" style="--d:1.2s;height:1.8rem"></span>
+    <p class="sub fx" style="--d:1.4s">中央执行网络放松的时候<br><strong style="color:var(--blood);font-weight:900;letter-spacing:.18em">D M N</strong> 才 会 被 激 活<br>顿 悟 · 灵 感 · 深 度 思 考　都 从 这 儿 来</p>
+    <span class="deco-vert" style="left:5%;top:50%;transform:translateY(-50%);--d:1.4s">D M N · 默 认 模 式 网 络</span>
+  </section>
+
+  <!-- ========== I-7 · 身体感觉错了 · titan ========== -->
+  <section class="scene titan"
+           data-bg="radial-gradient(ellipse at 50% 50%, rgba(214,50,31,.075), var(--ink) 56%)"
+           data-accent="blood"
+           data-act="ACT I · 身体">
+    <p class="tag fx" style="--d:0s">// 关 系 的 终 极 筛 选 标 准</p>
+    <h2 class="h fx scale" style="--d:.5s">身 体 感 觉 错 了</h2>
+    <p class="sub fx bone" style="--d:1.5s;font-weight:900;letter-spacing:.22em">关 系 就 错 了</p>
+    <p class="Tn fx ash" style="--d:2.4s;margin-top:1.6rem">相 信 你 的 身 体 反 应 ·　它 永 远 比 大 脑 更 诚 实</p>
+  </section>
+
+  <!-- ========== I-8 · 过渡 footnote ========== -->
+  <section class="scene footnote"
+           data-bg="radial-gradient(ellipse at 50% 50%, rgba(22,20,18,.95), var(--ink) 76%)"
+           data-accent="ash"
+           data-act="">
+    <p class="pill fx" style="--d:0s">1 0 万 年 前　·　那 把 刀 还 没 劈 下 来</p>
+    <p class="formula fx" style="--d:.9s">身 体 <span class="arrow">→</span> 注 意 力 <span class="arrow">→</span> 行 动</p>
+    <p class="note fx" style="--d:1.8s">在身体感觉安全时是全屏全景<br>只在危险时 · 注意力才变成局部</p>
+  </section>
+
+</main>
+
+<script>
+(() => {
+'use strict';
+
+const $ = s => document.querySelector(s);
+const stage  = $('#stage');
+const bgcA   = $('#bgc-a');
+const bgcB   = $('#bgc-b');
+const badge  = $('#badge');
+const orbit  = $('#orbit');
+const cv     = $('#cv');
+const ctx    = cv.getContext('2d');
+
+let W = innerWidth, H = innerHeight;
+const dpr = Math.min(window.devicePixelRatio || 1, 2);
+function resize(){
+  W = innerWidth; H = innerHeight;
+  cv.width  = W * dpr;
+  cv.height = H * dpr;
+  cv.style.width  = W + 'px';
+  cv.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize();
+addEventListener('resize', resize);
+
+// ============ POINTER ============
+const ptr = {
+  x: W * .5, y: H * .5,
+  tx: W * .5, ty: H * .5,
+  lastMove: performance.now(),
+};
+function setPointer(x, y){
+  ptr.tx = x; ptr.ty = y;
+  ptr.lastMove = performance.now();
+  document.body.classList.remove('idle');
+}
+addEventListener('pointermove', e => setPointer(e.clientX, e.clientY), {passive:true});
+
+// ============ PARTICLES ============
+const PARTS = [];
+function spawnP(){
+  return {
+    x: Math.random() * W,
+    y: H + 4,
+    r: .3 + Math.random() * .85,
+    vx: (Math.random() - .5) * .2,
+    vy: -(.10 + Math.random() * .26),
+    life: 0,
+    max: 220 + Math.random() * 220,
+    pk: .06 + Math.random() * .18,
+  };
+}
+function drawParticles(){
+  while(PARTS.length < 60) PARTS.push(spawnP());
+  ctx.clearRect(0, 0, W, H);
+  for(let i = PARTS.length - 1; i >= 0; i--){
+    const p = PARTS[i];
+    const dx = p.x - ptr.x, dy = p.y - ptr.y;
+    const d2 = dx*dx + dy*dy;
+    if(d2 < 200 * 200){
+      const d = Math.sqrt(d2) || 1;
+      const pull = (1 - d/200) * .024;
+      p.vx += dx/d * pull;
+      p.vy += dy/d * pull;
+    }
+    p.vx *= .99; p.vy *= .99;
+    p.x += p.vx; p.y += p.vy;
+    p.life++;
+    const t = p.life / p.max;
+    const a = t < .2 ? t/.2 * p.pk
+            : t < .8 ? p.pk
+            : (1 - t)/.2 * p.pk;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, 6.283);
+    ctx.fillStyle = `rgba(239,233,216,${a.toFixed(3)})`;
+    ctx.fill();
+    if(p.life > p.max || p.y < -8) PARTS.splice(i, 1);
+  }
+}
+
+// ============ MAIN RAF LOOP ============
+function loop(){
+  ptr.x += (ptr.tx - ptr.x) * .12;
+  ptr.y += (ptr.ty - ptr.y) * .12;
+
+  orbit.style.setProperty('--ix', ptr.x + 'px');
+  orbit.style.setProperty('--iy', ptr.y + 'px');
+
+  const dx = (ptr.x / W - .5) * -14;
+  const dy = (ptr.y / H - .5) * -10;
+  stage.style.transform = `translate3d(${dx.toFixed(2)}px, ${dy.toFixed(2)}px, 0)`;
+
+  if(performance.now() - ptr.lastMove > 3200){
+    document.body.classList.add('idle');
+  }
+
+  drawParticles();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ============ SCROLL · REVEAL OBSERVER ============
+const scenes = document.querySelectorAll('.scene');
+
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      revealObs.unobserve(e.target);
+    }
+  });
+}, {
+  threshold: .22,
+  rootMargin: '0px 0px -8% 0px',
+});
+scenes.forEach(s => revealObs.observe(s));
+
+// ============ SCROLL · ACTIVE SCENE TRACKER ============
+let activeScene = null;
+let bgState = 'a';
+
+function applyBg(grad){
+  const next = bgState === 'a' ? bgcB : bgcA;
+  const prev = bgState === 'a' ? bgcA : bgcB;
+  next.style.backgroundImage = grad;
+  // force a layout so the new bg is applied before opacity transition
+  void next.offsetWidth;
+  next.style.opacity = '1';
+  prev.style.opacity = '0';
+  bgState = bgState === 'a' ? 'b' : 'a';
+}
+
+function setActiveScene(scene){
+  if(scene === activeScene) return;
+  activeScene = scene;
+
+  const bg = scene.dataset.bg;
+  if(bg) applyBg(bg);
+
+  const accent = scene.dataset.accent || 'blood';
+  document.documentElement.style.setProperty('--accent',
+    accent === 'blood' ? 'var(--blood)' :
+    accent === 'ash'   ? 'var(--ash)'   :
+                         'var(--bone)');
+
+  const act = scene.dataset.act;
+  if(act){
+    if(badge.textContent !== act){
+      badge.textContent = act;
+    }
+    badge.classList.add('show');
+  }else{
+    badge.classList.remove('show');
+  }
+}
+
+function pickActiveScene(){
+  const mid = H * .5;
+  let best = scenes[0];
+  let bestDist = Infinity;
+  for(const s of scenes){
+    const r = s.getBoundingClientRect();
+    if(r.bottom < 0 || r.top > H) continue;
+    const sm = (r.top + r.bottom) * .5;
+    const d = Math.abs(sm - mid);
+    if(d < bestDist){ bestDist = d; best = s; }
+  }
+  setActiveScene(best);
+}
+
+let scrollScheduled = false;
+function onScroll(){
+  if(scrollScheduled) return;
+  scrollScheduled = true;
+  requestAnimationFrame(() => {
+    pickActiveScene();
+    scrollScheduled = false;
+  });
+}
+addEventListener('scroll', onScroll, {passive:true});
+addEventListener('resize', onScroll, {passive:true});
+
+// ============ INIT ============
+// Paint first bg immediately so the opening doesn't flash empty
+bgcA.style.backgroundImage = scenes[0].dataset.bg || '';
+bgcA.style.opacity = '1';
+
+// Reveal the opening scene right away (in case it's already at the threshold)
+requestAnimationFrame(() => {
+  scenes[0].classList.add('in');
+  pickActiveScene();
+});
+
+})();
+</script>
+</body>
+</html>
