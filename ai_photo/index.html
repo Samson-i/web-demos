@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>付子彤 AI 视觉作品集 V2</title>
+  <style>
+    :root {
+      --bg: #070706;
+      --ink: #f7efe4;
+      --muted: rgba(247,239,228,.68);
+      --soft: rgba(247,239,228,.12);
+      --gold: #f2c86e;
+      --red: #b72e2e;
+      --panel: rgba(16,14,12,.82);
+      --line: rgba(255,255,255,.14);
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 14% 8%, rgba(242,200,110,.16), transparent 28%),
+        radial-gradient(circle at 86% 20%, rgba(183,46,46,.18), transparent 26%),
+        linear-gradient(135deg, #0a0907, #070706 56%, #030303);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      opacity: .075;
+      mix-blend-mode: screen;
+      background:
+        linear-gradient(rgba(255,255,255,.04) 50%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.25'/%3E%3C/svg%3E");
+      background-size: 100% 4px, 220px 220px;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; }
+
+    .shell {
+      position: relative;
+      z-index: 2;
+    }
+
+    .topbar {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: min(1160px, calc(100% - 28px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(7,7,6,.62);
+      backdrop-filter: blur(22px);
+      box-shadow: 0 18px 70px rgba(0,0,0,.34);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 4px;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: conic-gradient(from 135deg, #fff2c7, var(--gold), #e54b45, #fff2c7);
+      box-shadow: 0 0 34px rgba(242,200,110,.38);
+    }
+
+    nav {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      color: rgba(247,239,228,.72);
+      font-size: 13px;
+    }
+
+    nav a {
+      padding: 9px 12px;
+      border-radius: 999px;
+      transition: .25s var(--ease);
+    }
+
+    nav a:hover {
+      color: #fff;
+      background: rgba(255,255,255,.08);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 13px;
+      background: linear-gradient(135deg, var(--gold), #fff2be);
+      color: #120e08;
+      box-shadow: 0 16px 44px rgba(242,200,110,.22);
+      white-space: nowrap;
+    }
+
+    .hero {
+      min-height: 96vh;
+      position: relative;
+      display: flex;
+      align-items: end;
+      padding: 118px max(22px, calc((100vw - 1180px) / 2)) 72px;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(3,3,3,.9), rgba(3,3,3,.46) 50%, rgba(3,3,3,.16)),
+        linear-gradient(0deg, rgba(3,3,3,.94), transparent 45%),
+        url("ai_photo_assets/compare-after-spring26-final.jpg") center right / cover no-repeat;
+      transform: scale(1.02);
+    }
+
+    .hero::after {
+      content: "VISION";
+      position: absolute;
+      right: -4vw;
+      bottom: 3vh;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(120px, 24vw, 360px);
+      line-height: .7;
+      color: rgba(255,255,255,.035);
+      letter-spacing: -.06em;
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      width: min(900px, 100%);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      margin-bottom: 22px;
+      padding: 8px 13px;
+      border: 1px solid rgba(242,200,110,.32);
+      border-radius: 999px;
+      background: rgba(255,255,255,.045);
+      color: var(--gold);
+      font-size: 12px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1, h2 {
+      font-family: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+      font-weight: 500;
+      letter-spacing: -.07em;
+    }
+
+    .hero h1 {
+      font-size: clamp(56px, 11vw, 150px);
+      line-height: .9;
+      max-width: 980px;
+    }
+
+    .hero h1 span {
+      color: var(--gold);
+    }
+
+    .hero-copy {
+      max-width: 650px;
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.85;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: #fff;
+      font-weight: 900;
+      transition: .25s var(--ease);
+    }
+
+    .btn.primary {
+      border: 0;
+      background: linear-gradient(135deg, var(--gold), #fff2be);
+      color: #120e08;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,.11);
+    }
+
+    .btn.primary:hover {
+      background: linear-gradient(135deg, #ffd979, #fff4cb);
+    }
+
+    .strip {
+      overflow: hidden;
+      border-block: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.035);
+    }
+
+    .strip-track {
+      display: flex;
+      width: max-content;
+      gap: 28px;
+      padding: 16px 0;
+      white-space: nowrap;
+      animation: move 24s linear infinite;
+      color: rgba(247,239,228,.78);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(18px, 3vw, 36px);
+    }
+
+    .strip-track span { color: var(--gold); }
+    @keyframes move { to { transform: translateX(-50%); } }
+
+    section {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 108px 0;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, .6fr);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 34px;
+    }
+
+    .section-head h2 {
+      font-size: clamp(42px, 7vw, 92px);
+      line-height: .94;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .compare {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: rgba(255,255,255,.1);
+      box-shadow: 0 35px 110px rgba(0,0,0,.36);
+    }
+
+    .compare-panel {
+      position: relative;
+      min-height: 620px;
+      overflow: hidden;
+      background: #040404;
+    }
+
+    .compare-panel img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      background: #050505;
+    }
+
+    .compare-label {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      z-index: 2;
+      padding: 11px 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      background: rgba(5,5,5,.68);
+      backdrop-filter: blur(18px);
+    }
+
+    .compare-label small {
+      display: block;
+      color: var(--gold);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-size: 10px;
+      margin-bottom: 4px;
+    }
+
+    .compare-label strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+    }
+
+    .work {
+      grid-column: span 4;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 24px;
+      background: rgba(12,12,11,.82);
+      box-shadow: 0 28px 80px rgba(0,0,0,.28);
+      transition: .3s var(--ease);
+    }
+
+    .work.large { grid-column: span 7; }
+    .work.medium { grid-column: span 5; }
+    .work:hover {
+      transform: translateY(-6px);
+      border-color: rgba(242,200,110,.32);
+    }
+
+    .work-media {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      display: block;
+      object-fit: cover;
+      object-position: center 28%;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      background: #090909;
+    }
+
+    .work.large .work-media,
+    .work.medium .work-media {
+      aspect-ratio: 5 / 6;
+    }
+
+    .work-info {
+      padding: 18px 18px 20px;
+      background:
+        radial-gradient(circle at 88% 0%, rgba(242,200,110,.1), transparent 35%),
+        rgba(7,7,6,.92);
+    }
+
+    .work-info small {
+      color: var(--gold);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .work-info h3 {
+      margin: 8px 0;
+      font-size: clamp(22px, 2.5vw, 30px);
+      letter-spacing: -.04em;
+      line-height: 1.15;
+    }
+
+    .work-info p {
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 14px;
+    }
+
+    .ideas {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .idea {
+      min-height: 260px;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 72% 16%, rgba(242,200,110,.1), transparent 36%),
+        rgba(255,255,255,.045);
+    }
+
+    .idea em {
+      display: block;
+      color: var(--gold);
+      font-style: normal;
+      margin-bottom: 34px;
+      letter-spacing: .14em;
+      font-size: 12px;
+    }
+
+    .idea strong {
+      display: block;
+      margin-bottom: 12px;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .idea p {
+      color: var(--muted);
+      line-height: 1.76;
+      font-size: 14px;
+    }
+
+    .final {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 70px;
+      padding: 64px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 34px;
+      background:
+        linear-gradient(90deg, rgba(7,7,6,.95), rgba(7,7,6,.7)),
+        url("ai_photo_assets/fractal-haze.jpg") center / cover no-repeat;
+      box-shadow: 0 36px 100px rgba(0,0,0,.34);
+    }
+
+    .final::after {
+      content: "IMAGE";
+      position: absolute;
+      right: -40px;
+      top: 20px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(120px, 18vw, 280px);
+      color: rgba(255,255,255,.045);
+      letter-spacing: -.06em;
+      pointer-events: none;
+    }
+
+    .final > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .final h2 {
+      max-width: 850px;
+      font-size: clamp(46px, 7vw, 96px);
+      line-height: .95;
+      margin-bottom: 22px;
+    }
+
+    .final p {
+      max-width: 720px;
+      color: var(--muted);
+      line-height: 1.85;
+      font-size: 16px;
+    }
+
+    footer {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      color: rgba(247,239,228,.46);
+      border-top: 1px solid rgba(255,255,255,.09);
+      font-size: 13px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: .7s var(--ease);
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 900px) {
+      nav { display: none; }
+      .hero { min-height: 90vh; }
+      .section-head,
+      .compare,
+      .ideas {
+        grid-template-columns: 1fr;
+      }
+      .compare-panel { min-height: 520px; }
+      .work,
+      .work.large,
+      .work.medium {
+        grid-column: span 12;
+      }
+      .work-media,
+      .work.large .work-media,
+      .work.medium .work-media {
+        aspect-ratio: 4 / 5;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        top: 10px;
+        width: calc(100% - 20px);
+      }
+      .brand { font-size: 13px; }
+      .pill { display: none; }
+      .hero {
+        padding: 104px 18px 56px;
+      }
+      .hero h1 {
+        font-size: 58px;
+      }
+      section {
+        width: calc(100% - 24px);
+        padding: 78px 0;
+      }
+      .compare-panel { min-height: 470px; }
+      .final {
+        padding: 34px 24px;
+        margin-bottom: 42px;
+      }
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#top"><span class="brand-mark"></span><span>付子彤 AI 视觉</span></a>
+      <nav>
+        <a href="#compare">前后对比</a>
+        <a href="#works">作品</a>
+        <a href="#ideas">观念</a>
+        <a href="#final">收束</a>
+      </nav>
+      <a class="pill" href="#works">查看作品</a>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-inner reveal">
+          <div class="kicker">AI 视觉导演 / 海报 / 人像</div>
+          <h1>普通照片，<br>重新导演成<span>作品场景。</span></h1>
+          <p class="hero-copy">我不把图片做成“好看一点”。我把人物放回一种更像电影、更像封面、更像记忆的气场里。AI 只是工具，真正成立的是方向、光影、质感和观看者的信念。</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#works">进入作品</a>
+            <a class="btn" href="#compare">查看反差</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="strip">
+        <div class="strip-track">
+          <div>电影海报 <span>✦</span> 婚礼视觉 <span>✦</span> 杂志封面 <span>✦</span> 小红书首图 <span>✦</span> 暗黑英雄 <span>✦</span></div>
+          <div>电影海报 <span>✦</span> 婚礼视觉 <span>✦</span> 杂志封面 <span>✦</span> 小红书首图 <span>✦</span> 暗黑英雄 <span>✦</span></div>
+        </div>
+      </div>
+
+      <section id="compare" class="reveal">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Before / After</div>
+            <h2>反差不是噱头，是视觉成立的证据。</h2>
+          </div>
+          <p>左边是被重新导演后的成片，右边是原始照片。不是单纯美化，而是把一张照片从“记录”推向“叙事”。</p>
+        </div>
+        <div class="compare">
+          <article class="compare-panel">
+            <img src="ai_photo_assets/compare-after-spring26-final.jpg" alt="帅版成片">
+            <div class="compare-label"><small>After</small><strong>帅版成片</strong></div>
+          </article>
+          <article class="compare-panel">
+            <img src="ai_photo_assets/compare-before-closeup.jpg" alt="没 P 原图">
+            <div class="compare-label"><small>Before</small><strong>没P原图</strong></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="works">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">Selected Works</div>
+            <h2>作品不是图片，是一次身份重写。</h2>
+          </div>
+          <p>每张图都给人物一个新的位置：电影主角、婚礼新人、封面人物、社交内容入口，或者某种更暗、更克制的自我。</p>
+        </div>
+
+        <div class="works-grid">
+          <article class="work large reveal">
+            <img class="work-media" src="ai_photo_assets/bloom-cover.jpg" alt="红色杂志封面">
+            <div class="work-info"><small>Project 001 / Movie Poster</small><h3>普通自拍 → 电影主角</h3><p>高饱和红色、封面文字和直视镜头，让人物从生活照进入更强烈的视觉身份。</p></div>
+          </article>
+          <article class="work medium reveal">
+            <img class="work-media" src="ai_photo_assets/wedding-couple.jpg" alt="情侣婚礼视觉">
+            <div class="work-info"><small>Project 002 / Wedding</small><h3>情侣合照 → 婚礼视觉</h3><p>保留真实亲密关系，同时加强仪式感、故事感和适合传播的画面张力。</p></div>
+          </article>
+          <article class="work reveal">
+            <img class="work-media" src="ai_photo_assets/qiu-ting-magazine-cover.jpg" alt="杂志封面">
+            <div class="work-info"><small>Project 003 / Cover</small><h3>头像 → 杂志封面</h3><p>用版式和黑白关系把普通头像改造成更稳定、更有记忆点的封面肖像。</p></div>
+          </article>
+          <article class="work reveal">
+            <img class="work-media" src="ai_photo_assets/floral-cover.jpg" alt="花系小红书首图">
+            <div class="work-info"><small>Project 004 / Xiaohongshu</small><h3>生活照 → 小红书首图</h3><p>柔雾、花卉和细节叠层，让图片更像一个可以被点开的内容入口。</p></div>
+          </article>
+          <article class="work reveal">
+            <img class="work-media" src="ai_photo_assets/fractal-haze.jpg" alt="暗黑英雄封面">
+            <div class="work-info"><small>Project 005 / Dark Hero</small><h3>普通人 → 暗黑英雄</h3><p>用低饱和、黑白噪点和视觉消散感，把人物做成故事里的中心。</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="ideas" class="reveal">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Image Philosophy</div>
+            <h2>作图不是修饰，是替照片找到命运感。</h2>
+          </div>
+          <p>一张图最终能不能成立，取决于它有没有自己的空气、温度、距离和被相信的理由。</p>
+        </div>
+        <div class="ideas">
+          <div class="idea"><em>01</em><strong>先有气场，再有风格。</strong><p>风格不是滤镜的名字，而是人物被放进某种光线以后，自然产生的身份。</p></div>
+          <div class="idea"><em>02</em><strong>文字不是装饰，是证词。</strong><p>标题、日期、编号和碎片信息会把一张图从“漂亮”推向“像真的存在过”。</p></div>
+          <div class="idea"><em>03</em><strong>保留一点不完美。</strong><p>太光滑的图没有呼吸。纹理、颗粒、阴影和边缘的不确定性，反而让画面可信。</p></div>
+          <div class="idea"><em>04</em><strong>最终被改造的是观看。</strong><p>图像不是答案，是一种被看见的气场。真正变化的是别人重新理解你的那一秒。</p></div>
+        </div>
+      </section>
+
+      <section id="final" class="final reveal">
+        <div class="kicker">Final Note</div>
+        <h2>图像不是答案，是一种被看见的气场。</h2>
+        <p>作图不是把人变得更完美，而是替一张照片找到它本来没有说出口的身份。光影、文字、材质和留白只是入口，真正被重塑的是观看者相信它的那一瞬间。</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#works">回看作品</a>
+          <a class="btn" href="#top">回到顶部</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>© 2026 付子彤 AI 视觉</div>
+      <div>人像风格化 / 电影海报 / 婚礼视觉 / 杂志封面</div>
+    </footer>
+  </div>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add('show');
+      });
+    }, { threshold: 0.14 });
+
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+  </script>
+</body>
+</html>
