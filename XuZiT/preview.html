@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>瞧你那命相｜AI Face Oracle</title>
+  <style>
+    :root {
+      --bg: #050505;
+      --ink: #f8f1e7;
+      --soft: rgba(248,241,231,.72);
+      --muted: rgba(248,241,231,.52);
+      --faint: rgba(248,241,231,.28);
+      --line: rgba(248,241,231,.12);
+      --gold: #d8b46a;
+      --gold2: #fff1c8;
+      --red: #a23726;
+      --jade: #476353;
+      --paper: #f5efe4;
+      --black: #050505;
+      --ease: cubic-bezier(.16,1,.3,1);
+      --radius: 34px;
+      --shadow: 0 42px 120px rgba(0,0,0,.46);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% -14%, rgba(216,180,106,.22), transparent 28%),
+        radial-gradient(circle at 86% 18%, rgba(162,55,38,.14), transparent 26%),
+        radial-gradient(circle at 12% 78%, rgba(71,99,83,.18), transparent 28%),
+        linear-gradient(180deg, #090807 0%, #050505 42%, #070604 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: .08;
+      background-image:
+        linear-gradient(rgba(255,255,255,.7) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(circle at 50% 0%, black, transparent 76%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -45%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: .06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: grain 9s steps(10) infinite;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes grain {
+      0%,100% { transform: translate(0,0); }
+      10% { transform: translate(-3%, 4%); }
+      30% { transform: translate(5%, -4%); }
+      50% { transform: translate(-4%, -2%); }
+      70% { transform: translate(3%, 5%); }
+      90% { transform: translate(-5%, 2%); }
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    img { display: block; max-width: 100%; }
+
+    .page { position: relative; z-index: 2; }
+
+    .nav {
+      position: fixed;
+      left: 50%;
+      top: 18px;
+      transform: translateX(-50%);
+      width: min(1180px, calc(100% - 30px));
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(5,5,5,.54);
+      backdrop-filter: blur(26px);
+      box-shadow: 0 20px 80px rgba(0,0,0,.28);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .14em;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 32% 26%, rgba(255,255,255,.85), transparent 18%),
+        conic-gradient(from 120deg, #57310d, var(--gold), var(--gold2), #7d3924, #57310d);
+      color: #130d05;
+      box-shadow: 0 0 32px rgba(216,180,106,.22);
+      font-family: "Songti SC", serif;
+      font-weight: 900;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 4px; color: rgba(248,241,231,.58); font-size: 13px; }
+    .nav-links a {
+      padding: 9px 12px;
+      border-radius: 999px;
+      transition: .25s var(--ease);
+    }
+    .nav-links a:hover { color: var(--ink); background: rgba(255,255,255,.075); }
+
+    .nav-cta {
+      padding: 10px 16px;
+      border-radius: 999px;
+      color: #120d05;
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      font-size: 13px;
+      font-weight: 950;
+      box-shadow: 0 18px 50px rgba(216,180,106,.2);
+      white-space: nowrap;
+    }
+
+    .wrap { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.02fr .98fr;
+      gap: 36px;
+      align-items: center;
+      padding: 120px 0 82px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(216,180,106,.26);
+      background: rgba(255,255,255,.042);
+      color: var(--gold2);
+      font-size: 12px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--gold2);
+      box-shadow: 0 0 0 7px rgba(216,180,106,.11), 0 0 24px rgba(255,241,200,.7);
+    }
+
+    h1 {
+      margin: 0 0 26px;
+      max-width: 780px;
+      font-family: "Songti SC", "Noto Serif SC", Georgia, serif;
+      font-size: clamp(58px, 9vw, 128px);
+      font-weight: 500;
+      line-height: .9;
+      letter-spacing: -.085em;
+      text-wrap: balance;
+    }
+
+    h1 span {
+      display: block;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(255,241,200,.78);
+      text-shadow: none;
+    }
+
+    .hero p {
+      max-width: 650px;
+      color: var(--soft);
+      font-size: 18px;
+      line-height: 1.9;
+      margin-bottom: 34px;
+    }
+
+    .hero p b { color: var(--gold2); }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .btn {
+      min-height: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 19px;
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 900;
+      transition: .25s var(--ease);
+      letter-spacing: .04em;
+    }
+    .btn.primary {
+      color: #120d05;
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      box-shadow: 0 20px 64px rgba(216,180,106,.21);
+    }
+    .btn.ghost {
+      color: var(--ink);
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.052);
+    }
+    .btn:hover { transform: translateY(-3px); filter: brightness(1.04); }
+    .btn:disabled { opacity: .52; cursor: not-allowed; transform: none; }
+
+    .hero-stage {
+      position: relative;
+      min-height: 650px;
+      display: grid;
+      place-items: center;
+      perspective: 1200px;
+    }
+
+    .device {
+      width: min(470px, 86vw);
+      aspect-ratio: .72;
+      border-radius: 46px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.13);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255,241,200,.16), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+      box-shadow: var(--shadow), inset 0 0 90px rgba(216,180,106,.052);
+      transform: rotateY(-7deg) rotateX(4deg);
+      animation: breathe 6s var(--ease) infinite;
+    }
+
+    @keyframes breathe {
+      0%,100% { transform: rotateY(-7deg) rotateX(4deg) translateY(0); }
+      50% { transform: rotateY(-3deg) rotateX(6deg) translateY(-14px); }
+    }
+
+    .device::before {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border-radius: 34px;
+      border: 1px solid rgba(216,180,106,.16);
+      background:
+        radial-gradient(circle at 50% 26%, rgba(216,180,106,.22), transparent 19%),
+        linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.4));
+    }
+
+    .face-oracle {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .orbit {
+      width: 82%;
+      aspect-ratio: 1;
+      border-radius: 999px;
+      position: relative;
+      border: 1px solid rgba(216,180,106,.16);
+      box-shadow: inset 0 0 80px rgba(216,180,106,.06), 0 0 80px rgba(216,180,106,.08);
+    }
+
+    .orbit::before, .orbit::after {
+      content: "";
+      position: absolute;
+      inset: 32px;
+      border-radius: 999px;
+      border: 1px dashed rgba(216,180,106,.28);
+      animation: spin 28s linear infinite;
+    }
+    .orbit::after {
+      inset: 88px;
+      border-style: solid;
+      border-color: rgba(255,241,200,.16);
+      animation-duration: 18s;
+      animation-direction: reverse;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .mask {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      width: 154px;
+      height: 236px;
+      border-radius: 84px 84px 74px 74px / 100px 100px 96px 96px;
+      border: 1px solid rgba(255,241,200,.28);
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255,241,200,.18), transparent 30%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.1));
+      box-shadow: inset 0 0 44px rgba(216,180,106,.08), 0 0 40px rgba(216,180,106,.1);
+      overflow: hidden;
+    }
+
+    .mask::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 60px;
+      top: 0;
+      background: linear-gradient(180deg, transparent, rgba(255,241,200,.38), transparent);
+      filter: blur(2px);
+      animation: scanFace 4.5s var(--ease) infinite;
+    }
+    @keyframes scanFace {
+      0%,100% { transform: translateY(-54px); opacity: .26; }
+      50% { transform: translateY(218px); opacity: 1; }
+    }
+
+    .line {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,241,200,.56), transparent);
+    }
+    .l1 { top: 45px; }
+    .l2 { top: 88px; }
+    .l3 { top: 128px; }
+    .l4 { top: 171px; }
+    .l5 { top: 210px; }
+
+    .glyph {
+      position: absolute;
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(216,180,106,.2);
+      color: var(--gold2);
+      background: rgba(0,0,0,.42);
+      backdrop-filter: blur(18px);
+      font-family: "Songti SC", serif;
+      font-size: 23px;
+      box-shadow: 0 0 32px rgba(216,180,106,.08);
+    }
+    .g1 { top: 3%; left: 50%; transform: translateX(-50%); }
+    .g2 { top: 50%; right: -7px; transform: translateY(-50%); }
+    .g3 { bottom: 3%; left: 50%; transform: translateX(-50%); }
+    .g4 { top: 50%; left: -7px; transform: translateY(-50%); }
+
+    .phone-caption {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 28px;
+      padding: 18px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.42);
+      backdrop-filter: blur(22px);
+    }
+    .phone-caption small { display: block; color: var(--gold2); letter-spacing: .16em; font-size: 11px; margin-bottom: 8px; }
+    .phone-caption strong { font-size: 22px; letter-spacing: -.04em; }
+
+    .ribbon {
+      overflow: hidden;
+      border-block: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.035);
+      transform: rotate(-1deg) scale(1.04);
+      margin: -38px 0 100px;
+    }
+    .ribbon-track {
+      display: flex;
+      width: max-content;
+      gap: 28px;
+      padding: 17px 0;
+      animation: roll 25s linear infinite;
+      color: rgba(248,241,231,.72);
+      font-family: "Songti SC", Georgia, serif;
+      font-size: clamp(20px, 3.2vw, 38px);
+      white-space: nowrap;
+    }
+    .ribbon span { color: var(--gold2); }
+    @keyframes roll { to { transform: translateX(-50%); } }
+
+    section { padding: 0 0 112px; }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 1fr .76fr;
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 34px;
+    }
+    .kicker {
+      color: var(--gold2);
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+    h2 {
+      font-family: "Songti SC", "Noto Serif SC", Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(42px, 6.6vw, 86px);
+      line-height: .98;
+      letter-spacing: -.07em;
+      text-wrap: balance;
+    }
+    .section-head p {
+      color: var(--muted);
+      line-height: 1.9;
+      font-size: 15px;
+    }
+
+    .ritual-grid {
+      display: grid;
+      grid-template-columns: .88fr 1.12fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.11);
+      background:
+        radial-gradient(circle at 84% 0%, rgba(216,180,106,.1), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.026));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255,241,200,.035), transparent 30%, rgba(162,55,38,.03));
+    }
+
+    .upload-panel { padding: 26px; }
+    .mini { position: relative; z-index: 1; color: var(--gold2); letter-spacing: .18em; text-transform: uppercase; font-size: 12px; margin-bottom: 18px; }
+
+    .drop {
+      position: relative;
+      z-index: 1;
+      min-height: 460px;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      border-radius: 28px;
+      border: 1px dashed rgba(216,180,106,.32);
+      background:
+        radial-gradient(circle at 50% 30%, rgba(216,180,106,.12), transparent 32%),
+        rgba(0,0,0,.2);
+      text-align: center;
+    }
+
+    .upload-sigil {
+      width: 94px;
+      height: 94px;
+      margin: 0 auto 20px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(216,180,106,.24);
+      color: var(--gold2);
+      font-size: 38px;
+      box-shadow: inset 0 0 38px rgba(216,180,106,.1);
+    }
+
+    .drop h3 { font-size: 27px; margin-bottom: 12px; letter-spacing: -.04em; }
+    .drop p {
+      max-width: 390px;
+      margin: 0 auto 20px;
+      color: var(--muted);
+      line-height: 1.82;
+      font-size: 14px;
+    }
+    #fileInput { display: none; }
+    .file-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 17px;
+      border-radius: 999px;
+      border: 1px solid rgba(216,180,106,.28);
+      color: var(--gold2);
+      background: rgba(255,255,255,.045);
+      cursor: pointer;
+      font-weight: 850;
+      transition: .25s var(--ease);
+    }
+    .file-label:hover { transform: translateY(-2px); border-color: rgba(255,241,200,.52); }
+    .file-meta { min-height: 20px; margin-top: 14px; color: var(--faint); font-size: 13px; }
+
+    .form-grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      text-align: left;
+    }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label {
+      display: block;
+      margin-bottom: 7px;
+      color: rgba(255,241,200,.82);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    .form-field input {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.11);
+      background: rgba(0,0,0,.24);
+      color: var(--ink);
+      border-radius: 15px;
+      padding: 13px 14px;
+      outline: none;
+      transition: .2s var(--ease);
+    }
+    .form-field input:focus {
+      border-color: rgba(255,241,200,.48);
+      box-shadow: 0 0 0 4px rgba(216,180,106,.08);
+    }
+
+    .scanner-panel {
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .scanner-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status {
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(216,180,106,.2);
+      color: var(--gold2);
+      background: rgba(0,0,0,.2);
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .screen {
+      position: relative;
+      z-index: 1;
+      min-height: 535px;
+      display: grid;
+      place-items: center;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.1);
+      background:
+        radial-gradient(circle at 50% 30%, rgba(216,180,106,.12), transparent 35%),
+        rgba(0,0,0,.26);
+      overflow: hidden;
+    }
+
+    .frame {
+      width: min(426px, 92%);
+      aspect-ratio: 4/5;
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      border: 1px solid rgba(216,180,106,.18);
+      background: rgba(0,0,0,.34);
+      box-shadow: inset 0 0 50px rgba(216,180,106,.06), 0 30px 80px rgba(0,0,0,.45);
+    }
+
+    .preview, .placeholder {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview { display: none; }
+    .placeholder {
+      display: grid;
+      place-items: center;
+      color: rgba(248,241,231,.34);
+      letter-spacing: .13em;
+      background:
+        radial-gradient(circle at 50% 28%, rgba(216,180,106,.15), transparent 32%),
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.16));
+    }
+
+    .scan-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .scan-layer::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(216,180,106,.09) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(216,180,106,.09) 1px, transparent 1px);
+      background-size: 34px 34px;
+    }
+    .scan-beam {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 70px;
+      top: -70px;
+      background: linear-gradient(180deg, transparent, rgba(255,241,200,.2), rgba(255,241,200,.42), rgba(216,180,106,.18), transparent);
+      filter: blur(2px);
+      animation: scanPhoto 4s var(--ease) infinite;
+    }
+    @keyframes scanPhoto {
+      0%,100% { transform: translateY(0); opacity: .25; }
+      50% { transform: translateY(520px); opacity: 1; }
+    }
+
+    .point {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--gold2);
+      box-shadow: 0 0 16px rgba(255,241,200,.9);
+      animation: blink 2s var(--ease) infinite;
+    }
+    @keyframes blink { 0%,100% { opacity:.45; transform: scale(.86); } 50% { opacity:1; transform: scale(1.22); } }
+    .p1 { top: 18%; left: 50%; }
+    .p2 { top: 35%; left: 34%; }
+    .p3 { top: 35%; right: 34%; }
+    .p4 { top: 51%; left: 50%; }
+    .p5 { top: 68%; left: 39%; }
+    .p6 { top: 68%; right: 39%; }
+    .p7 { top: 82%; left: 50%; }
+
+    .tag {
+      position: absolute;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(216,180,106,.2);
+      background: rgba(0,0,0,.5);
+      color: var(--gold2);
+      font-size: 11px;
+      letter-spacing: .08em;
+      backdrop-filter: blur(14px);
+    }
+    .t1 { left: 12px; top: 12%; }
+    .t2 { right: 12px; top: 30%; }
+    .t3 { left: 12px; top: 51%; }
+    .t4 { right: 12px; top: 68%; }
+    .t5 { left: 50%; bottom: 18px; transform: translateX(-50%); }
+
+    .bar {
+      position: relative;
+      z-index: 1;
+      height: 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(216,180,106,.12);
+      background: rgba(255,255,255,.06);
+      overflow: hidden;
+    }
+    .fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #5b3915, var(--gold), var(--gold2));
+      box-shadow: 0 0 24px rgba(216,180,106,.5);
+      transition: width .32s var(--ease);
+    }
+    .progress-meta {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .mode-tabs {
+      position: relative;
+      z-index: 1;
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .mode-tab {
+      min-height: 50px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 18px;
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      cursor: pointer;
+      transition: .22s var(--ease);
+      font-weight: 800;
+    }
+    .mode-tab.active,
+    .mode-tab:hover {
+      color: var(--gold2);
+      border-color: rgba(216,180,106,.38);
+      background: rgba(216,180,106,.07);
+      transform: translateY(-2px);
+    }
+
+    .result {
+      display: none;
+      margin-top: 38px;
+      animation: reveal .8s var(--ease) both;
+    }
+    .result.show { display: block; }
+    @keyframes reveal { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .metric {
+      min-height: 204px;
+      padding: 20px;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.1);
+      background:
+        radial-gradient(circle at 80% 0%, rgba(216,180,106,.1), transparent 32%),
+        rgba(255,255,255,.042);
+      box-shadow: 0 24px 80px rgba(0,0,0,.22);
+    }
+    .metric .num {
+      font-size: 42px;
+      line-height: 1;
+      color: var(--gold2);
+      font-weight: 900;
+      letter-spacing: -.08em;
+      margin-bottom: 10px;
+    }
+    .metric h4 { font-size: 16px; margin-bottom: 10px; }
+    .metric p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.78;
+      min-height: 72px;
+    }
+    .meter {
+      height: 7px;
+      margin-top: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      overflow: hidden;
+      border: 1px solid rgba(216,180,106,.08);
+    }
+    .meter i {
+      display: block;
+      height: 100%;
+      width: 50%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #6b461a, var(--gold), var(--gold2));
+    }
+
+    .oracle-report {
+      display: grid;
+      grid-template-columns: 1.04fr .96fr;
+      gap: 18px;
+      padding: 26px;
+      border-radius: 34px;
+      border: 1px solid rgba(255,255,255,.11);
+      background:
+        radial-gradient(circle at 85% 0%, rgba(216,180,106,.13), transparent 30%),
+        linear-gradient(180deg, rgba(255,255,255,.058), rgba(255,255,255,.026));
+      box-shadow: var(--shadow);
+    }
+    .oracle-report small,
+    .long-report small,
+    .method-card small,
+    .product-card small,
+    .chapter small {
+      display: block;
+      color: var(--gold2);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-size: 11px;
+      margin-bottom: 12px;
+    }
+    .oracle-report h3 {
+      font-family: "Songti SC", Georgia, serif;
+      font-weight: 500;
+      font-size: clamp(32px, 4.5vw, 56px);
+      line-height: 1.05;
+      letter-spacing: -.06em;
+      margin-bottom: 16px;
+    }
+    .oracle-report p {
+      color: var(--soft);
+      line-height: 1.95;
+      font-size: 15px;
+      margin-bottom: 14px;
+    }
+    .quote {
+      margin-top: 16px;
+      padding: 18px 20px;
+      border-left: 2px solid rgba(255,241,200,.58);
+      background: rgba(216,180,106,.055);
+      border-radius: 0 20px 20px 0;
+      color: var(--gold2);
+      line-height: 1.7;
+      font-size: 18px;
+    }
+
+    .side { display: grid; gap: 12px; }
+    .pill {
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(0,0,0,.18);
+    }
+    .pill b {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--gold2);
+      letter-spacing: .12em;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .pill span {
+      color: var(--muted);
+      line-height: 1.78;
+      font-size: 14px;
+    }
+
+    .long-report {
+      margin-top: 18px;
+      border-radius: 36px;
+      border: 1px solid rgba(255,255,255,.11);
+      background:
+        radial-gradient(circle at 95% 0%, rgba(162,55,38,.1), transparent 28%),
+        radial-gradient(circle at 10% 0%, rgba(216,180,106,.12), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.026));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .report-cover {
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 1fr 118px;
+      gap: 18px;
+      align-items: start;
+      border-bottom: 1px solid rgba(255,255,255,.09);
+    }
+    .report-cover h3 {
+      font-family: "Songti SC", Georgia, serif;
+      font-size: clamp(34px, 4.8vw, 58px);
+      line-height: 1.05;
+      font-weight: 500;
+      letter-spacing: -.06em;
+      margin-bottom: 14px;
+    }
+    .report-cover p {
+      max-width: 840px;
+      color: var(--muted);
+      line-height: 1.92;
+      font-size: 15px;
+    }
+    .stamp {
+      width: 112px;
+      height: 112px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-radius: 999px;
+      border: 1px solid rgba(216,180,106,.34);
+      color: var(--gold2);
+      background: rgba(0,0,0,.22);
+      box-shadow: inset 0 0 40px rgba(216,180,106,.09);
+      font-family: "Songti SC", serif;
+      font-weight: 900;
+      letter-spacing: .18em;
+      line-height: 1.38;
+    }
+    .index {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,.07);
+    }
+    .index div {
+      padding: 18px;
+      background: rgba(0,0,0,.22);
+    }
+    .index b {
+      display: block;
+      color: var(--gold2);
+      letter-spacing: .12em;
+      font-size: 12px;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+    }
+    .index span {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 13px;
+    }
+    .chapters {
+      padding: 28px;
+      display: grid;
+      gap: 14px;
+    }
+    .chapter {
+      padding: 24px;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(0,0,0,.2);
+    }
+    .chapter h4 {
+      color: var(--ink);
+      font-size: 24px;
+      letter-spacing: -.04em;
+      margin-bottom: 12px;
+    }
+    .chapter p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.95;
+      margin-bottom: 12px;
+    }
+    .chapter-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .chapter-list div {
+      border-radius: 17px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.028);
+      padding: 14px;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+    }
+    .chapter-list b { color: var(--gold2); }
+
+    .report-end {
+      padding: 26px 30px 30px;
+      border-top: 1px solid rgba(255,255,255,.09);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+    }
+    .report-end p { color: var(--gold2); font-size: 20px; line-height: 1.7; }
+    .copy-btn {
+      min-height: 48px;
+      white-space: nowrap;
+      border: none;
+      border-radius: 999px;
+      padding: 0 18px;
+      color: #120d05;
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      cursor: pointer;
+      font-weight: 900;
+      letter-spacing: .06em;
+    }
+
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .method-card {
+      min-height: 250px;
+      padding: 23px;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,.1);
+      background:
+        radial-gradient(circle at 90% 0%, rgba(216,180,106,.08), transparent 32%),
+        rgba(255,255,255,.036);
+      transition: .28s var(--ease);
+    }
+    .method-card:hover { transform: translateY(-7px); border-color: rgba(216,180,106,.3); background-color: rgba(255,255,255,.055); }
+    .method-card h3 { font-size: 22px; letter-spacing: -.04em; margin-bottom: 12px; }
+    .method-card p { color: var(--muted); line-height: 1.86; font-size: 14px; }
+
+    .product {
+      display: grid;
+      grid-template-columns: .92fr 1.08fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .product-hero {
+      min-height: 500px;
+      padding: 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 36px;
+      border: 1px solid rgba(255,255,255,.11);
+      background:
+        radial-gradient(circle at 72% 18%, rgba(216,180,106,.16), transparent 36%),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.026));
+      box-shadow: var(--shadow);
+    }
+    .product-hero h2 { margin-bottom: 20px; }
+    .product-hero p { color: var(--muted); line-height: 1.95; max-width: 560px; }
+
+    .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .product-card {
+      min-height: 190px;
+      padding: 22px;
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.036);
+    }
+    .product-card h3 { font-size: 21px; letter-spacing: -.04em; margin-bottom: 10px; }
+    .product-card p { color: var(--muted); line-height: 1.8; font-size: 14px; }
+
+    .final {
+      padding-bottom: 44px;
+    }
+    .final-card {
+      min-height: 560px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: clamp(28px, 5vw, 62px);
+      border-radius: 44px;
+      border: 1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(circle at 72% 24%, rgba(216,180,106,.2), transparent 28%),
+        radial-gradient(circle at 25% 28%, rgba(162,55,38,.12), transparent 28%),
+        linear-gradient(135deg, #111, #050505 72%);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .final-card::before {
+      content: "命相";
+      position: absolute;
+      right: -6%;
+      top: 4%;
+      color: rgba(255,255,255,.045);
+      font-family: "Songti SC", serif;
+      font-size: clamp(128px, 22vw, 320px);
+      letter-spacing: -.16em;
+      white-space: nowrap;
+    }
+    .final-card > * { position: relative; z-index: 1; }
+    .final-card h2 { max-width: 850px; margin-bottom: 20px; }
+    .final-card p { max-width: 720px; color: var(--muted); line-height: 1.9; margin-bottom: 28px; }
+
+    footer {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 26px 0 48px;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,.09);
+      color: rgba(248,241,231,.42);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    footer strong { color: var(--gold2); }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: .8s var(--ease);
+    }
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1060px) {
+      .hero, .ritual-grid, .oracle-report, .product { grid-template-columns: 1fr; }
+      .hero-stage { min-height: 560px; }
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+      .method-grid { grid-template-columns: repeat(2, 1fr); }
+      .section-head { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .nav-links { display: none; }
+      .nav-cta { display: none; }
+      .hero { padding-top: 112px; }
+      h1 { font-size: clamp(58px, 18vw, 94px); }
+      .device { width: min(380px, 88vw); }
+      .hero-stage { min-height: 500px; }
+      .form-grid,
+      .mode-tabs,
+      .metric-grid,
+      .method-grid,
+      .product-grid,
+      .chapter-list,
+      .index,
+      .report-cover,
+      .report-end {
+        grid-template-columns: 1fr;
+      }
+      .screen { min-height: 430px; }
+      .chapters { padding: 18px; }
+      .chapter { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <a class="brand" href="#top" aria-label="回到顶部">
+        <span class="mark">相</span>
+        <span>瞧你那命相</span>
+      </a>
+      <div class="nav-links">
+        <a href="#ritual">观相</a>
+        <a href="#method">结构</a>
+        <a href="#product">产品</a>
+        <a href="#contact">合作</a>
+      </div>
+      <a class="nav-cta" href="#ritual">UPLOAD FACE</a>
+    </nav>
+
+    <main id="top">
+      <section class="hero wrap">
+        <div class="reveal">
+          <div class="eyebrow"><span class="pulse"></span> AI Face Oracle / Black Gold Ritual</div>
+          <h1>一张脸，<span>一份命相档案。</span></h1>
+          <p>
+            不做土味测试，不做廉价算命。把上传照片、脸部扫描、宫位校准、长篇报告做成一个有压迫感的 <b>AI 东方命相体验产品</b>。用户不是点按钮，用户是在进入一场仪式。
+          </p>
+          <div class="actions">
+            <a class="btn primary" href="#ritual">进入观相仪式</a>
+            <a class="btn ghost" href="#product">看商业包装</a>
+          </div>
+        </div>
+
+        <div class="hero-stage reveal">
+          <div class="device">
+            <div class="face-oracle">
+              <div class="orbit">
+                <div class="glyph g1">命</div>
+                <div class="glyph g2">财</div>
+                <div class="glyph g3">运</div>
+                <div class="glyph g4">相</div>
+                <div class="mask">
+                  <div class="line l1"></div>
+                  <div class="line l2"></div>
+                  <div class="line l3"></div>
+                  <div class="line l4"></div>
+                  <div class="line l5"></div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-caption">
+              <small>FACE ARCHIVE UNLOCKED</small>
+              <strong>三停 · 五官 · 十二宫 · 流年</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="ribbon" aria-hidden="true">
+        <div class="ribbon-track">
+          <div>命宫校准 <span>✦</span> 财帛映射 <span>✦</span> 夫妻宫读取 <span>✦</span> 贵人识别 <span>✦</span> 长篇报告生成 <span>✦</span></div>
+          <div>命宫校准 <span>✦</span> 财帛映射 <span>✦</span> 夫妻宫读取 <span>✦</span> 贵人识别 <span>✦</span> 长篇报告生成 <span>✦</span></div>
+        </div>
+      </div>
+
+      <section id="ritual" class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">Ritual Entry</div>
+            <h2>上传样本，命盘开始转动。</h2>
+          </div>
+          <p>这里保留你原网页最有价值的功能：上传照片、模拟扫描、选择问题方向、生成结果。但视觉上更克制，更像一个能收费的产品入口。</p>
+        </div>
+
+        <div class="ritual-grid reveal">
+          <article class="panel upload-panel">
+            <div class="mini">01 / Face Sample</div>
+            <div class="drop">
+              <div>
+                <div class="upload-sigil">⟡</div>
+                <h3>递交面相样本</h3>
+                <p>建议使用正脸、清晰、光线稳定的照片。当前页面是娱乐向演示，不构成真实预测或人生决策依据。</p>
+                <label class="file-label" for="fileInput">选择照片</label>
+                <input id="fileInput" type="file" accept="image/*" />
+                <div class="file-meta" id="fileMeta">尚未选择照片</div>
+
+                <div class="form-grid">
+                  <div class="form-field">
+                    <label for="userName">姓名 / Name</label>
+                    <input id="userName" placeholder="例如：付子彤" />
+                  </div>
+                  <div class="form-field">
+                    <label for="userAge">年龄 / Age</label>
+                    <input id="userAge" type="number" min="1" max="99" placeholder="例如：22" />
+                  </div>
+                  <div class="form-field full">
+                    <label for="userQuestion">最想问的问题 / Question</label>
+                    <input id="userQuestion" placeholder="例如：我最近适合做事业、感情还是赚钱？" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mode-tabs" aria-label="选择报告方向">
+              <button class="mode-tab active" data-mode="self">测自己</button>
+              <button class="mode-tab" data-mode="love">感情</button>
+              <button class="mode-tab" data-mode="money">财运</button>
+              <button class="mode-tab" data-mode="career">事业</button>
+              <button class="mode-tab" data-mode="people">贵人</button>
+            </div>
+          </article>
+
+          <article class="panel scanner-panel">
+            <div class="scanner-top">
+              <div class="mini">02 / Oracle Scan</div>
+              <div class="status" id="status">Waiting</div>
+            </div>
+            <div class="screen">
+              <div class="frame">
+                <img class="preview" id="preview" alt="上传照片预览" />
+                <div class="placeholder" id="placeholder">尚未载入面相样本</div>
+                <div class="scan-layer">
+                  <div class="scan-beam"></div>
+                  <span class="point p1"></span><span class="point p2"></span><span class="point p3"></span><span class="point p4"></span><span class="point p5"></span><span class="point p6"></span><span class="point p7"></span>
+                  <div class="tag t1">额庭校准</div>
+                  <div class="tag t2">眉眼捕捉</div>
+                  <div class="tag t3">鼻相映射</div>
+                  <div class="tag t4">下庭解析</div>
+                  <div class="tag t5">命盘生成</div>
+                </div>
+              </div>
+            </div>
+            <div class="bar"><div class="fill" id="fill"></div></div>
+            <div class="progress-meta"><span id="progressLabel">未开始</span><span id="progressPercent">0%</span></div>
+            <button class="btn primary" id="startBtn">开始观相</button>
+          </article>
+        </div>
+
+        <div class="result" id="resultAnchor">
+          <div class="section-head" style="margin-top:46px;">
+            <div>
+              <div class="kicker">Destiny Profile</div>
+              <h2>档案解封。</h2>
+            </div>
+            <p>结果页被设计成“高端报告封面 + 指标卡 + 长篇章节”，更适合作为付费结果页、私域转化页或小红书截图素材。</p>
+          </div>
+
+          <div class="metric-grid" id="metricGrid"></div>
+
+          <div class="oracle-report">
+            <div>
+              <small>Final Oracle</small>
+              <h3 id="reportTitle">你的命相，不是等来的。</h3>
+              <p id="reportText">命盘等待生成中。</p>
+              <div class="quote" id="quote">“相不是答案，相是提醒。”</div>
+            </div>
+            <div class="side">
+              <div class="pill"><b>Keywords</b><span id="keywords">等待生成</span></div>
+              <div class="pill"><b>Recent Signal</b><span id="warning">等待生成</span></div>
+              <div class="pill"><b>Jianghu Sentence</b><span id="jianghu">等待生成</span></div>
+            </div>
+          </div>
+
+          <div class="long-report">
+            <div class="report-cover">
+              <div>
+                <small>Extended Face Oracle Report</small>
+                <h3>五层命相档案 · 长篇报告</h3>
+                <p id="longIntro">这份报告把一张脸拆成五层：骨架层、气色层、流年层、现实层、行动层。它的价值不是“准不准”三个字，而是让用户愿意继续读、愿意截图、愿意转发、愿意进入下一步咨询。</p>
+              </div>
+              <div class="stamp">命相<br>档案</div>
+            </div>
+            <div class="index">
+              <div><b>Archive</b><span id="archiveId">等待生成</span></div>
+              <div><b>Main Key</b><span id="mainKey">等待生成</span></div>
+              <div><b>Theme</b><span id="mainTheme">等待生成</span></div>
+              <div><b>Action</b><span id="mainAction">等待生成</span></div>
+            </div>
+            <div class="chapters" id="chapters">
+              <div class="chapter">
+                <small>Report Locked</small>
+                <h4>长篇报告尚未生成</h4>
+                <p>上传照片并点击“开始观相”后，这里会展开多章节命相档案。</p>
+              </div>
+            </div>
+            <div class="report-end">
+              <p id="finalSentence">“命盘不是叫你等答案，是叫你把自己推到会发生答案的地方。”</p>
+              <button class="copy-btn" id="copyReportBtn">复制报告</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="method" class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <div class="kicker">Reading System</div>
+            <h2>不是算命小工具，是命运被揭开的过程。</h2>
+          </div>
+          <p>这部分保留原网页“方法论”的价值，但用更像产品白皮书的排版呈现，老板一看会觉得它不是玩具，而是一套可包装、可传播、可转化的内容系统。</p>
+        </div>
+
+        <div class="method-grid reveal">
+          <article class="method-card"><small>01 / Bone Structure</small><h3>三停五岳</h3><p>先看脸部比例与承载感：上停讲早年，中停讲现实执行，下停讲后劲。五岳决定一个人是否撑得住事。</p></article>
+          <article class="method-card"><small>02 / Energy Signal</small><h3>命宫气色</h3><p>命宫是状态仪表盘，明暗、纹路、气口决定近期报告的语气：是收，是冲，是守，还是转向。</p></article>
+          <article class="method-card"><small>03 / Real Problem</small><h3>十二宫位</h3><p>把抽象命相落到感情、事业、财运、人际、家宅和健康，让报告从“玄”变成用户能理解的问题。</p></article>
+          <article class="method-card"><small>04 / Human Reading</small><h3>五官识人</h3><p>眉眼看判断，鼻相看财帛，口相看关系，耳相看承载。最后形成“看自己，也能看人”的传播点。</p></article>
+        </div>
+      </section>
+
+      <section id="product" class="wrap">
+        <div class="product reveal">
+          <div class="product-hero">
+            <div>
+              <div class="kicker">Commercial Packaging</div>
+              <h2>玄学，也可以做成奢侈品体验。</h2>
+            </div>
+            <p>真正能卖的不是“测一测”，而是一段完整旅程：好奇点击、上传照片、等待扫描、读完报告、保存截图、进入私域、咨询转化。</p>
+          </div>
+          <div class="product-grid">
+            <article class="product-card"><small>01 / Traffic</small><h3>低门槛引流</h3><p>用户因为“我想看看自己什么命”进入页面，上传照片天然有参与感。</p></article>
+            <article class="product-card"><small>02 / Retention</small><h3>长报告停留</h3><p>短结果没有记忆点，长篇档案才有阅读时间、截图冲动和转发素材。</p></article>
+            <article class="product-card"><small>03 / Trust</small><h3>仪式感建立信任</h3><p>不是直接给结论，而是让用户经历“系统正在读取我”的过程。</p></article>
+            <article class="product-card"><small>04 / Conversion</small><h3>私域承接转化</h3><p>报告最后承接“解读、复盘、咨询、付费完整报告”等下一步动作。</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" class="wrap final">
+        <div class="final-card reveal">
+          <div class="kicker">Next Step</div>
+          <h2>一张脸，一个入口，一套可转化的 AI 玄学产品。</h2>
+          <p>这版可以直接作为老板展示页：先讲气质，再给交互，再给报告，再讲商业路径。它不像一个测试页面，更像一个产品雏形。</p>
+          <div class="actions">
+            <a class="btn primary" href="#ritual">体验观相流程</a>
+            <a class="btn ghost" href="#top">返回顶部</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div><strong>瞧你那命相</strong><br>AI Face Oracle / Black Gold Oriental Metaphysics Experience</div>
+      <div>声明：本页面为娱乐向网页原型，不构成真实预测、医学建议、投资建议或人生决策依据。</div>
+    </footer>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const placeholder = document.getElementById('placeholder');
+    const fileMeta = document.getElementById('fileMeta');
+    const startBtn = document.getElementById('startBtn');
+    const fill = document.getElementById('fill');
+    const progressLabel = document.getElementById('progressLabel');
+    const progressPercent = document.getElementById('progressPercent');
+    const statusText = document.getElementById('status');
+    const result = document.getElementById('resultAnchor');
+    const metricGrid = document.getElementById('metricGrid');
+    const reportTitle = document.getElementById('reportTitle');
+    const reportText = document.getElementById('reportText');
+    const quote = document.getElementById('quote');
+    const keywords = document.getElementById('keywords');
+    const warning = document.getElementById('warning');
+    const jianghu = document.getElementById('jianghu');
+    const archiveId = document.getElementById('archiveId');
+    const mainKey = document.getElementById('mainKey');
+    const mainTheme = document.getElementById('mainTheme');
+    const mainAction = document.getElementById('mainAction');
+    const longIntro = document.getElementById('longIntro');
+    const chapters = document.getElementById('chapters');
+    const finalSentence = document.getElementById('finalSentence');
+    const copyReportBtn = document.getElementById('copyReportBtn');
+    const userName = document.getElementById('userName');
+    const userAge = document.getElementById('userAge');
+    const userQuestion = document.getElementById('userQuestion');
+    const tabs = document.querySelectorAll('.mode-tab');
+
+    let fileName = '默认面相样本';
+    let mode = 'self';
+
+    const modeData = {
+      self: {
+        title: ['你不是没运，只是还没把运接住。','你的命相不是轻飘型，是后发型。','这张脸的提示很明确：势能够了，别再拖。'],
+        body: ['综合来看，你不是靠短期热闹起势的人，而是靠判断、积累、交付和承载感把局面慢慢做稳。真正的优势不在表面讨喜，而在一旦进入状态，就能把事情压住。','你的命盘更像“慢慢赢”的类型。机会不会立刻砸下来，它更愿意落在已经准备好的人身上。最近最重要的不是求好运，而是把手里的一个方向做成结果。','这是张适合做事的脸，不适合空耗。命运不靠幻想推动，而靠推进、筛选、积累和布局。'],
+        kw: ['稳、压、聚、后劲、克制','判断、节奏、执行、筛选、承载','沉住气、做减法、接动作、抓时机'],
+        warn: ['别急着证明自己。近期更适合先稳住节奏，再挑一个点狠狠干。','少一点情绪式行动，多一点结构化推进。','先清环境、清任务、清目标，再谈翻盘。'],
+        jianghu: ['别一边想翻身，一边舍不得旧惯性。','想赢，就别总拿情绪当方向盘。','局已经在动了，别让自己先泄气。']
+      },
+      love: {
+        title: ['感情不是没机会，是你不适合低质量拉扯。','关系宫位已亮：别把试探当安全感。','你的桃花不怕少，怕乱。'],
+        body: ['夫妻宫的叙事更像慢热型关系。你不是没有情感浓度，而是很难对不稳定的人彻底放心。真正适合你的关系，不是上头，是稳定、体面、有行动。','感情里最容易出问题的地方，是明明想靠近，却又本能防御。不要用反复试探证明自己被爱，能长期托底的人比短期让你上头的人更重要。','你有吸引力，但不适合烂桃花消耗。关系要看行动，不看嘴甜。'],
+        kw: ['边界、试探、慢热、稳定、分寸','吸引、克制、筛选、信任、长期','暧昧、判断、靠近、防御、真心'],
+        warn: ['近期别用情绪测试关系。看行动，不看嘴甜。','不要为了确认自己被爱，就制造无意义的拉扯。','能让你长期安心的人，比短期让你上头的人更重要。'],
+        jianghu: ['别把烂桃花当命中注定。','喜欢不是问题，失去判断才是问题。','别急着交心，先看对方能不能托底。']
+      },
+      money: {
+        title: ['财帛宫已动：钱要从确定性里来。','你的财相怕乱投，不怕慢赚。','近期财气不虚，但忌冲动。'],
+        body: ['鼻相与财帛的组合更偏执行型财运。越能掌控节奏、越能复盘结果，钱越愿意往你这里流。近期适合小成本测试、明确报价和稳定交付。','你的赚钱欲不弱，但财帛宫提醒你：真正能留下来的钱，往往来自稳定的服务和作品，而不是情绪上头的冒险。','钱不是靠幻想来，是靠看得见的交付来。近期最该做的是把能力包装成别人愿意买单的结果。'],
+        kw: ['现金流、测试、报价、成交、复盘','资源、执行、稳定、风险、边界','慢赚、聚财、节奏、控制、交付'],
+        warn: ['别碰看不懂的局，别投无法解释的钱。','最近适合报价、发布、测试市场，不适合重仓赌命。','钱不是靠上头挣的，是靠清醒留下的。'],
+        jianghu: ['别急着翻身，先别把自己摔死。','能查账的才叫机会，不能查账的叫故事。','财来有路，别往坑里走。']
+      },
+      career: {
+        title: ['事业宫提示：把气势落到作品里。','不是没有上升运，是执行还不够锋利。','事业要开局，先把一个方向打穿。'],
+        body: ['事业宫更偏靠作品和结果说话。你适合把优势集中到一个具体项目里，做出能被看见、能被传播、能让别人立刻理解的成果。','你的命相不怕苦，怕的是分散。只要方向确定，局面会比想象中更快打开。近期适合做网页、作品集、案例和服务包装。','真正的事业运不是凭空出现，而是当你拿得出成品时，别人终于知道该把机会交给谁。'],
+        kw: ['项目、作品、曝光、执行、上升','聚焦、结果、案例、推进、专业感','定位、交付、节奏、打穿、机会'],
+        warn: ['不要一边想做大，一边没有作品给别人看。','少换方向，多做成品。事业宫最怕半途而废。','你需要的不是灵感，是连续交付。'],
+        jianghu: ['别说你会，拿东西出来。','机会喜欢有成品的人。','先把一个小局赢透，再谈大局。']
+      },
+      people: {
+        title: ['奴仆宫已亮：你要学会借人借势。','贵人不是求来的，是筛出来的。','你适合识人，但别轻易托底。'],
+        body: ['贵人帮手这一宫，看的不是你会不会讨好人，而是你能不能筛选、合作、留人。你身边不是没人，而是需要重新分类：谁给情绪，谁给资源，谁只会消耗。','识人的关键不是看对方热不热情，而是看对方是否稳定、守信、有交付。近期合作要先小后大，先验结果再给信任。','你的贵人运不是靠求人出来的，而是靠你自己做出局面后，把对的人吸引进来。'],
+        kw: ['贵人、筛选、合作、边界、托底','识人、借势、稳定、守信、交付','团队、帮手、人情、资源、分类'],
+        warn: ['别把情绪价值误当成能力。','近期合作要先小后大，先验交付再谈信任。','能成事的人不一定最热情，但一定有结果。'],
+        jianghu: ['贵人不是供起来的，是一起做出来的。','别把大事交给嘴甜的人。','识人先看小事，小事不稳，大事必翻。']
+      }
+    };
+
+    const metrics = [
+      { key: '骨相气场', desc: ['整体气场偏稳，带一点压迫感，不是轻飘型。','轮廓存在感明显，适合做主导而非陪衬。','气场里有克制感，表面平静，内里有锋芒。'] },
+      { key: '眉眼性格', desc: ['眉眼信号显示你不是迟钝型，而是观察型。','眼神带审视感，对人对事不轻信。','性格偏试探型：先看反应，再决定力度。'] },
+      { key: '鼻相财运', desc: ['财运不是天降型，更像执行型。','现实驱动力不弱，赚钱欲望有，但会挑机会。','财气不算虚，但容易被节奏影响。'] },
+      { key: '唇形关系', desc: ['表达欲分对象，对不重要的人会本能收着。','关系模式里有边界感，喜欢有效率的连接。','吸引力偏神秘和节制，不是热闹迎合。'] },
+      { key: '下庭后运', desc: ['后劲不错，很多事不是一开始赢，而是越往后越稳。','抗压能力偏强，能靠韧性扳回局面。','稳定性是你的重要资产。'] }
+    ];
+
+    function hash(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) - h) + str.charCodeAt(i);
+        h |= 0;
+      }
+      return Math.abs(h);
+    }
+
+    function pick(arr, seed, offset = 0) {
+      return arr[(seed + offset) % arr.length];
+    }
+
+    function score(seed, min, max, offset) {
+      return min + ((seed + offset * 29) % (max - min + 1));
+    }
+
+    function getAgeSignal(age) {
+      const n = Number(age);
+      if (!n || n <= 0) return ['阶段未定', '当前阶段更看重“先做出一个确定结果”。'];
+      if (n < 22) return ['早势未定', '此阶段最重要的是建立判断力和一个可复制的能力。'];
+      if (n < 30) return ['开局成形', '此阶段适合用作品、项目、曝光和交付把自己推到台前。'];
+      if (n < 40) return ['中盘起势', '此阶段要减少无效试错，把资源集中到能长期复利的事情上。'];
+      return ['后劲承载', '此阶段更看重筛选、稳定、资源整合与守住局面。'];
+    }
+
+    function renderMetrics(seed) {
+      metricGrid.innerHTML = '';
+      metrics.forEach((item, idx) => {
+        const value = score(seed, 63, 97, idx + 1);
+        const card = document.createElement('div');
+        card.className = 'metric';
+        card.innerHTML = `
+          <div class="num">${value}</div>
+          <h4>${item.key}</h4>
+          <p>${pick(item.desc, seed, idx + 3)}</p>
+          <div class="meter"><i style="width:${value}%"></i></div>
+        `;
+        metricGrid.appendChild(card);
+      });
+    }
+
+    function buildChapters(seed, person, ageSignal, data) {
+      const moneyLine = pick(['钱要从可复盘的交付里来，不要从冲动里来。','财气最怕分散，先把一个入口做稳。','近期适合小成本测试市场，不适合盲目加码。'], seed, 2);
+      const loveLine = pick(['关系里少试探，多看行动。','别把短期上头当成长期稳定。','能让你安心的人，比让你紧张的人更值得靠近。'], seed, 3);
+      const careerLine = pick(['事业宫的重点不是想法，是成品。','先做出一个能被别人看见的作品。','不要用忙碌代替推进，结果才是信号。'], seed, 4);
+      const peopleLine = pick(['贵人不是求来的，是筛出来的。','合作先看小事，小事不稳，大事必翻。','把人分层，比盲目热情更重要。'], seed, 5);
+
+      chapters.innerHTML = `
+        <div class="chapter">
+          <small>Chapter 01 / 命相总断</small>
+          <h4>${person}的主命气质：${pick(['稳中带锋','后发承载','压住局面','冷静起势'], seed)}</h4>
+          <p>${data.body[seed % data.body.length]}</p>
+          <p>这不是一张适合一直犹豫的命盘。它给出的提醒很直接：你需要把能量收束到一件具体事情上，让外界看到结果，而不是只看到你的想法。</p>
+          <div class="chapter-list">
+            <div><b>优势：</b>判断力、抗压、后劲、能在混乱里重新建立秩序。</div>
+            <div><b>风险：</b>想太多、启动慢、容易被环境和情绪消耗。</div>
+          </div>
+        </div>
+
+        <div class="chapter">
+          <small>Chapter 02 / 年龄流年</small>
+          <h4>${ageSignal[0]}：当前阶段最怕空转</h4>
+          <p>${ageSignal[1]} 你的命盘不是叫你等一个奇迹，而是提醒你把自己推到“机会能看见你”的地方。</p>
+          <p>所谓流年，不是固定答案，而是一种阶段提醒：该冲的时候别守，该守的时候别乱冲。现在最重要的是减少无关变量，留下一个能连续推进的方向。</p>
+        </div>
+
+        <div class="chapter">
+          <small>Chapter 03 / 现实宫位</small>
+          <h4>财、情、业、人，四个现实落点</h4>
+          <div class="chapter-list">
+            <div><b>财帛：</b>${moneyLine}</div>
+            <div><b>感情：</b>${loveLine}</div>
+            <div><b>事业：</b>${careerLine}</div>
+            <div><b>贵人：</b>${peopleLine}</div>
+          </div>
+        </div>
+
+        <div class="chapter">
+          <small>Chapter 04 / 行动提醒</small>
+          <h4>真正改命的不是报告，是下一步动作</h4>
+          <p>接下来七天，只做三件事：第一，清掉一个消耗你的变量；第二，确定一个能被交付的结果；第三，把这个结果发出去，让别人看见。</p>
+          <p>命相给你的不是安慰，而是方向。不要把这份报告当结论，把它当提醒。</p>
+        </div>
+      `;
+    }
+
+    function generateReport() {
+      const name = (userName.value || '').trim();
+      const person = name || '你';
+      const age = Number(userAge.value || 0);
+      const q = (userQuestion.value || '').trim();
+      const seed = hash([fileName, name, age, q, mode].join('|')) || 7;
+      const data = modeData[mode];
+      const ageSignal = getAgeSignal(age);
+
+      renderMetrics(seed);
+      reportTitle.textContent = pick(data.title, seed);
+      reportText.textContent = pick(data.body, seed, 1) + (q ? ' 你问的是：“' + q + '”。这件事的关键不是立刻求一个确定答案，而是先看自己手里有没有一个能推进的动作。' : '');
+      quote.textContent = '“' + pick(data.jianghu, seed, 2) + '”';
+      keywords.textContent = pick(data.kw, seed);
+      warning.textContent = pick(data.warn, seed, 1);
+      jianghu.textContent = pick(data.jianghu, seed, 3);
+
+      archiveId.textContent = 'MX-' + String(seed).slice(0, 6).padEnd(6, '8');
+      mainKey.textContent = pick(data.kw, seed, 2);
+      mainTheme.textContent = ageSignal[0] + ' / ' + pick(['收束能量','做出作品','减少空转','筛选关系','建立确定性'], seed, 4);
+      mainAction.textContent = pick(['做减法，抓一个方向连续推进。','别再只想，先把结果交出来。','从一个小入口开始验证市场。','先稳住节奏，再扩大动作。'], seed, 5);
+      longIntro.textContent = person + '的这份命相档案，重点不在“命好命坏”，而在于看见当前阶段最该处理的现实问题。面相只是入口，真正的答案藏在行动里。';
+      finalSentence.textContent = '“' + pick(['相不是答案，相是提醒；真正改命的是你接下来怎么走。','命盘不是叫你等答案，是叫你把自己推到会发生答案的地方。','别只问运什么时候来，先问自己有没有站到运会经过的路上。'], seed, 6) + '”';
+
+      buildChapters(seed, person, ageSignal, data);
+      result.classList.add('show');
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    fileInput.addEventListener('change', (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      fileName = file.name;
+      fileMeta.textContent = '已载入：' + file.name;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+        statusText.textContent = 'Loaded';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((item) => item.classList.remove('active'));
+        tab.classList.add('active');
+        mode = tab.dataset.mode;
+      });
+    });
+
+    startBtn.addEventListener('click', () => {
+      startBtn.disabled = true;
+      statusText.textContent = 'Scanning';
+      let value = 0;
+      const steps = ['载入面相样本', '校准三停五岳', '读取眉眼气口', '映射十二宫位', '生成长篇档案'];
+      const timer = setInterval(() => {
+        value += Math.floor(Math.random() * 12) + 8;
+        if (value > 100) value = 100;
+        fill.style.width = value + '%';
+        progressPercent.textContent = value + '%';
+        progressLabel.textContent = steps[Math.min(steps.length - 1, Math.floor(value / 22))];
+
+        if (value >= 100) {
+          clearInterval(timer);
+          setTimeout(() => {
+            generateReport();
+            statusText.textContent = 'Completed';
+            progressLabel.textContent = '观相完成';
+            startBtn.disabled = false;
+            startBtn.textContent = '重新观相';
+          }, 360);
+        }
+      }, 520);
+    });
+
+    copyReportBtn.addEventListener('click', async () => {
+      const text = [
+        reportTitle.textContent,
+        reportText.textContent,
+        '关键词：' + keywords.textContent,
+        '近期提醒：' + warning.textContent,
+        '江湖一句话：' + jianghu.textContent,
+        finalSentence.textContent
+      ].join('\n\n');
+
+      try {
+        await navigator.clipboard.writeText(text);
+        copyReportBtn.textContent = '已复制';
+      } catch (e) {
+        copyReportBtn.textContent = '复制失败';
+      }
+      setTimeout(() => copyReportBtn.textContent = '复制报告', 1500);
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add('show');
+      });
+    }, { threshold: .12 });
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+  </script>
+</body>
+</html>
