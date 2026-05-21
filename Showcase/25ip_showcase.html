@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>25IP · 作品现场 / WORKS IN THE WILD</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+SC:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --ink: #f5f1e8;
+    --accent: #c8ff00;
+    --red: #ff2d2d;
+    --dim: #555;
+    --border: #1f1f1f;
+    --card: #131313;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    mix-blend-mode: overlay;
+  }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 14px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(20px);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+  .brand { color: var(--accent); font-weight: 700; }
+  .brand-sep { color: var(--dim); margin: 0 12px; }
+  .live { color: var(--red); display: flex; align-items: center; gap: 6px; }
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+  /* ============ HERO ============ */
+  .hero {
+    min-height: 100vh;
+    padding: 120px 32px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-ghost {
+    position: absolute;
+    top: 35%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(120px, 28vw, 420px);
+    line-height: 0.85;
+    color: transparent;
+    -webkit-text-stroke: 1px #1a1a1a;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.02em;
+    z-index: 0;
+  }
+
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-top div { line-height: 1.8; }
+  .hero-top span { color: var(--ink); }
+
+  .hero-main {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+
+  .hero-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: clamp(56px, 11vw, 160px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin-bottom: 36px;
+  }
+  .hero-title em {
+    font-style: normal;
+    color: var(--accent);
+    position: relative;
+  }
+
+  .hero-quote {
+    max-width: 580px;
+    font-size: 14px;
+    color: #aaa;
+    line-height: 1.9;
+    margin-bottom: 60px;
+    border-left: 2px solid var(--accent);
+    padding-left: 20px;
+  }
+  .hero-quote-attr {
+    margin-top: 12px;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+  }
+
+  .hero-meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    border-top: 1px solid var(--border);
+    padding-top: 28px;
+  }
+  .hero-meta-item .num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .hero-meta-item .num-text {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-top: 8px;
+  }
+  .hero-meta-item .sub {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .hero-meta-item .lbl {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 24px;
+    right: 32px;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--dim);
+    z-index: 2;
+    animation: bob 2s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* ============ SECTION HEAD ============ */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    padding: 80px 32px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    min-width: 50px;
+  }
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    flex: 1;
+    line-height: 1.1;
+  }
+  .section-sub {
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    max-width: 280px;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* ============ WORKS GRID ============ */
+  .works {
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .work {
+    grid-column: span 6;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 32px;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    transition: background 0.4s;
+    display: flex;
+    flex-direction: column;
+    min-height: 380px;
+    overflow: hidden;
+  }
+
+  .work.span-3 { grid-column: span 3; min-height: 320px; }
+  .work.span-4 { grid-column: span 4; min-height: 320px; }
+  .work.span-8 { grid-column: span 8; min-height: 420px; }
+  .work.span-12 { grid-column: span 12; min-height: 480px; }
+
+  .work:hover {
+    background: var(--card);
+  }
+  .work:hover .work-arrow {
+    transform: translate(6px, -6px);
+    color: var(--accent);
+  }
+  .work:hover .work-bg-num {
+    color: #1a1a1a;
+    transform: translate(0, -8px);
+  }
+
+  .work-bg-num {
+    position: absolute;
+    bottom: -40px;
+    right: -10px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 280px;
+    line-height: 1;
+    color: #0e0e0e;
+    pointer-events: none;
+    transition: all 0.5s;
+    z-index: 0;
+  }
+
+  .work-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .work-tag {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    border: 1px solid var(--accent);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .work-author {
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+  }
+  .work-author b { color: var(--ink); font-weight: 700; }
+
+  .work-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .work.span-8 .work-title,
+  .work.span-12 .work-title { font-size: 38px; }
+  .work.span-4 .work-title { font-size: 22px; }
+  .work.span-3 .work-title { font-size: 20px; }
+
+  .work-desc {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #999;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+  }
+
+  .work-quote {
+    font-family: 'Noto Serif SC', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink);
+    border-left: 2px solid var(--accent);
+    padding: 6px 0 6px 16px;
+    margin: 18px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .work-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 24px;
+    position: relative;
+    z-index: 1;
+  }
+  .work-cta {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--ink);
+  }
+  .work-arrow {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--dim);
+    transition: all 0.3s;
+    line-height: 1;
+  }
+
+  /* ============ CAPABILITY MATRIX ============ */
+  .cap-matrix {
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at top, rgba(200,255,0,0.04), transparent 60%),
+      var(--black);
+  }
+
+  /* 顶部 LIVE 计数器 */
+  .cap-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+  .cap-stat {
+    padding: 32px 24px;
+    border-right: 1px solid var(--border);
+    text-align: left;
+    position: relative;
+  }
+  .cap-stat:last-child { border-right: none; }
+  .cap-stat::before {
+    content: '';
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  .cap-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .cap-stat-lbl {
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.18em;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* 标签云 */
+  .cap-cloud {
+    position: relative;
+    min-height: 600px;
+    padding: 60px 32px;
+    overflow: hidden;
+  }
+  .cap-cloud::before,
+  .cap-cloud::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 80px;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .cap-cloud::before {
+    left: 0;
+    background: linear-gradient(90deg, var(--black), transparent);
+  }
+  .cap-cloud::after {
+    right: 0;
+    background: linear-gradient(-90deg, var(--black), transparent);
+  }
+
+  .cap-tag {
+    position: absolute;
+    white-space: nowrap;
+    user-select: none;
+    cursor: default;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #888;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(15,15,15,0.6);
+    backdrop-filter: blur(4px);
+    transition: all 0.4s ease;
+    opacity: 0;
+    animation: tagFadeIn 0.8s ease forwards;
+  }
+  @keyframes tagFadeIn {
+    to { opacity: 1; }
+  }
+
+  .cap-tag.t-lg {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--ink);
+    padding: 10px 22px;
+    border-color: #2a2a2a;
+  }
+  .cap-tag.t-md {
+    font-size: 18px;
+    color: #ccc;
+    padding: 8px 18px;
+  }
+  .cap-tag.t-hot {
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(200,255,0,0.15);
+  }
+  .cap-tag.t-blink {
+    animation: tagFadeIn 0.8s ease forwards, blink 3s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .cap-tag:hover {
+    color: var(--black);
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.08);
+    z-index: 10;
+  }
+
+  .cap-tag.floating {
+    animation: tagFadeIn 0.8s ease forwards, floatTag 6s ease-in-out infinite;
+  }
+  @keyframes floatTag {
+    0%, 100% { transform: translate(0, 0); }
+    33% { transform: translate(8px, -10px); }
+    66% { transform: translate(-6px, 6px); }
+  }
+
+  /* 底部号召 */
+  .cap-footer {
+    padding: 48px 32px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .cap-footer-text {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 18px;
+    line-height: 1.9;
+    color: #aaa;
+  }
+
+  @media (max-width: 900px) {
+    .cap-stats { grid-template-columns: repeat(2, 1fr); }
+    .cap-stat { border-bottom: 1px solid var(--border); }
+    .cap-stat-num { font-size: 38px; }
+    .cap-cloud { min-height: 500px; padding: 40px 16px; }
+    .cap-tag.t-lg { font-size: 18px; }
+    .cap-tag.t-md { font-size: 14px; }
+  }
+  .gallery {
+    padding: 0 32px 80px;
+    border-bottom: 1px solid var(--border);
+  }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 40px;
+  }
+  .gallery-item {
+    aspect-ratio: 3/4;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+  }
+  .gallery-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+  }
+  .gallery-item::before {
+    content: attr(data-label);
+    position: absolute;
+    top: 12px; left: 12px;
+    color: var(--dim);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+  }
+  .gallery-item img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .gallery-note {
+    margin-top: 32px;
+    padding: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.8;
+  }
+
+  /* ============ LINKS GRID ============ */
+  .links-section {
+    padding: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .link-card {
+    padding: 28px 32px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 180px;
+  }
+  .link-card:hover { background: var(--card); }
+  .link-card:hover .link-arrow { color: var(--accent); transform: translate(4px, -4px); }
+  .link-card-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+  }
+  .link-card-title {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.3;
+    flex: 1;
+  }
+  .link-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+  }
+  .link-arrow {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    transition: all 0.3s;
+  }
+
+  /* ============ MANIFESTO / FOOTER ============ */
+  .manifesto {
+    padding: 100px 32px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .manifesto-text {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: clamp(28px, 5vw, 56px);
+    line-height: 1.3;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .manifesto-text em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .manifesto-attr {
+    margin-top: 40px;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 0.3em;
+  }
+
+  footer {
+    padding: 40px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+  }
+  footer .accent { color: var(--accent); }
+
+  /* ============ INTRO OVERLAY ============ */
+  .intro {
+    position: fixed;
+    inset: 0;
+    background: var(--black);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 1.2s ease, visibility 1.2s ease;
+  }
+  .intro.gone {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .intro-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(200,255,0,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,255,0,0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0;
+    animation: gridFade 1.5s ease 0.3s forwards;
+  }
+  @keyframes gridFade { to { opacity: 1; } }
+
+  .intro-corner {
+    position: absolute;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.2em;
+    opacity: 0;
+    animation: cornerFade 0.8s ease 0.5s forwards;
+  }
+  .intro-corner.tl { top: 24px; left: 28px; }
+  .intro-corner.tr { top: 24px; right: 28px; text-align: right; }
+  .intro-corner.bl { bottom: 24px; left: 28px; }
+  .intro-corner.br { bottom: 24px; right: 28px; text-align: right; }
+  .intro-corner b { color: var(--accent); }
+  @keyframes cornerFade { to { opacity: 1; } }
+
+  .intro-center {
+    text-align: center;
+    max-width: 720px;
+    padding: 0 32px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .intro-label {
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--accent);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: labelFade 0.8s ease 0.8s forwards;
+  }
+  @keyframes labelFade { to { opacity: 1; } }
+
+  .intro-quote {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(18px, 2.4vw, 26px);
+    line-height: 1.9;
+    color: var(--ink);
+    margin-bottom: 40px;
+    min-height: 200px;
+  }
+  .intro-quote span {
+    opacity: 0;
+    display: inline;
+  }
+  .intro-quote em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .intro-attr {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--dim);
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .intro-attr.show { opacity: 1; }
+
+  .intro-enter {
+    margin-top: 60px;
+    padding: 14px 40px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .intro-enter.show { opacity: 1; }
+  .intro-enter:hover {
+    background: var(--accent);
+    color: var(--black);
+    letter-spacing: 0.4em;
+  }
+  .intro-enter::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 1px solid var(--accent);
+    opacity: 0.3;
+    animation: ringPulse 2s ease-in-out infinite;
+  }
+  @keyframes ringPulse {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.05); opacity: 0; }
+  }
+
+  .intro-scan {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.4;
+    animation: scan 3s ease-in-out infinite;
+  }
+  @keyframes scan {
+    0% { top: 0; }
+    100% { top: 100%; }
+  }
+
+  body.intro-active { overflow: hidden; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .work, .work.span-3, .work.span-4, .work.span-6, .work.span-8, .work.span-12 { grid-column: span 12; }
+    .links-grid { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-meta { grid-template-columns: repeat(2, 1fr); }
+    .section-sub { display: none; }
+    .hero-quote { padding-left: 16px; }
+  }
+</style>
+</head>
+<body class="intro-active">
+
+<!-- ============ INTRO OVERLAY ============ -->
+<div class="intro" id="intro">
+  <div class="intro-grid"></div>
+  <div class="intro-scan"></div>
+
+  <div class="intro-corner tl">
+    25IP · WORKS IN THE WILD<br>
+    <b>VOL.001 / 2026.05.21</b>
+  </div>
+  <div class="intro-corner tr">
+    A LIVE ARCHIVE<br>
+    <b>BY 25 期 营友们</b>
+  </div>
+  <div class="intro-corner bl">
+    <b style="color:var(--red);">●</b> LIVE TRANSMISSION
+  </div>
+  <div class="intro-corner br">
+    SYSTEM READY<br>
+    <b>↓</b>
+  </div>
+
+  <div class="intro-center">
+    <div class="intro-label">— 来自一个还在长的现场 —</div>
+    <div class="intro-quote" id="introQuote"></div>
+    <div class="intro-attr" id="introAttr">WORKS IN THE WILD · VOL.001 · 2026.05.21</div>
+    <button class="intro-enter" id="introEnter" onclick="enterSite()">ENTER / 进入现场</button>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <span class="brand">25IP</span>
+    <span class="brand-sep">·</span>
+    <span>WORKS IN THE WILD / 作品现场</span>
+  </div>
+  <div class="live">
+    <span class="live-dot"></span>
+    LIVE · 2026.05.21
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-ghost">25IP</div>
+
+  <div class="hero-top">
+    <div>
+      ARCHIVE / <span>25ip-vol-001</span><br>
+      WITNESSED BY / <span>25 期 营友们</span><br>
+      INTENT / <span>让大家看见我们做了什么</span>
+    </div>
+    <div style="text-align:right;">
+      VOL. <span>001</span><br>
+      <span>15 works · 67 images · 13 links</span><br>
+      <span style="color: var(--accent);">STATUS / IN THE WILD</span>
+    </div>
+  </div>
+
+  <div class="hero-main">
+    <div class="hero-eyebrow">25 期 IP 营 / 一份还在长的档案</div>
+    <h1 class="hero-title">
+      他们不是<em>在学</em>，<br>
+      他们已经<em>在做</em>。
+    </h1>
+
+    <div class="hero-quote">
+      这里没有完美的成品，也没有标准答案。<br>
+      只有一群正在被现实评判的人——<br>
+      他们写代码、做网页、生图、讲故事，<br>
+      然后把作品扔到风里。
+      <div class="hero-quote-attr">— WORKS IN THE WILD · VOL.001</div>
+    </div>
+
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="lbl">CATEGORY / 01</div>
+        <div class="num-text">影像短片</div>
+        <div class="sub">把观点拍成画面</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="lbl">CATEGORY / 02</div>
+        <div class="num-text">深度长文</div>
+        <div class="sub">把思考写成系统</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="lbl">CATEGORY / 03</div>
+        <div class="num-text">视觉作品</div>
+        <div class="sub">把人物做进画面</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="lbl">CATEGORY / 04</div>
+        <div class="num-text">个人总结</div>
+        <div class="sub">把这段路写成档案</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">↓ SCROLL TO ENTER</div>
+</section>
+
+<!-- ============ SECTION 01: 影像短片 ============ -->
+<div class="section-head">
+  <div class="section-num">01 / 06</div>
+  <div class="section-title">影像短片 · 把观点拍成画面</div>
+  <div class="section-sub">每一支网页都是一支观点短片。这不是文章，是影像。</div>
+</div>
+
+<section class="works">
+
+  <a href="https://shulin-short.pages.dev/#extended-reading" target="_blank" class="work span-8">
+    <div class="work-bg-num">01</div>
+    <div class="work-head">
+      <div class="work-tag">WORKFLOW</div>
+      <div class="work-author">25IP · VOL.001</div>
+    </div>
+    <h3 class="work-title">AI Short Drama Workflow<br>AI 短剧工作流</h3>
+    <div class="work-quote">没有剧组。已经开机。浏览器是银幕，时间线是片场，Prompt 是调度台。</div>
+    <div class="work-desc">
+      32 个章节，把"一个人完成一支短剧"的完整流水线拆开。
+      核心命题：AI 短剧的核心问题，不是生成，而是连续性。
+      人物会漂移、空间会跳变、动作会断裂——这是一台正在启动的影像生产机器。
+    </div>
+    <div class="work-footer">
+      <div class="work-cta">ENTER / 进入工作流</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+
+  <a href="https://shuchenglin.cn/" target="_blank" class="work span-4">
+    <div class="work-bg-num">02</div>
+    <div class="work-head">
+      <div class="work-tag">MANIFESTO</div>
+      <div class="work-author">25IP · VOL.001</div>
+    </div>
+    <h3 class="work-title">这是一场<br>注意力的战争</h3>
+    <div class="work-quote">19 岁到 28 岁，第一次切断反馈瘾。</div>
+    <div class="work-desc">
+      一份手稿。怎么把"注意力"当资产经营。
+    </div>
+    <div class="work-footer">
+      <div class="work-cta">READ ↗</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+
+</section>
+
+<!-- ============ SECTION 02: 深度长文 ============ -->
+<div class="section-head">
+  <div class="section-num">02 / 06</div>
+  <div class="section-title">深度长文 · 一群正在做的人</div>
+  <div class="section-sub">不是少数人在产出，是一群人在同时长出来。</div>
+</div>
+
+<section class="works">
+
+  <a href="https://snow3689.github.io/shulin/" target="_blank" class="work span-6">
+    <div class="work-bg-num">03</div>
+    <div class="work-head">
+      <div class="work-tag">INTERACTIVE</div>
+      <div class="work-author">精确实验室 NO.001</div>
+    </div>
+    <h3 class="work-title">语言的力量<br><span style="font-size:14px; color:var(--dim); font-weight:400;">The Power of Language</span></h3>
+    <div class="work-quote">想彻底奴役一个民族？删掉他们语言里所有关于反抗的词。</div>
+    <div class="work-desc">
+      点击删词的交互式宣言。语言不是窗户，是栅栏。
+      你说不出来的东西，你就想不到。
+    </div>
+    <div class="work-footer">
+      <div class="work-cta">DELETE A WORD ↗</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+
+  <a href="https://flourish-quiz-d9gpet0psdc8f8a54-1328050307.tcloudbaseapp.com/shenmluyouqi/" target="_blank" class="work span-6">
+    <div class="work-bg-num">04</div>
+    <div class="work-head">
+      <div class="work-tag">PIXEL JOURNEY</div>
+      <div class="work-author">25IP · VOL.001</div>
+    </div>
+    <h3 class="work-title">从不会写提示词<br>到做出审美路由器</h3>
+    <div class="work-quote">像素风格 · 一段被游戏化的成长。</div>
+    <div class="work-desc">
+      把"学 AI"这件事做成了一段像素冒险。
+      从零到产出"审美路由器"——工具的门槛不是技术，是你怎么讲。
+    </div>
+    <div class="work-footer">
+      <div class="work-cta">START QUEST ↗</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+
+</section>
+
+<!-- ============ SECTION 03: 个人总结 ============ -->
+<div class="section-head">
+  <div class="section-num">03 / 06</div>
+  <div class="section-title">个人总结 · 这段路被写成档案</div>
+  <div class="section-sub">每一个人的进入、停顿、跃迁，都被独立记下来了。</div>
+</div>
+
+<section class="works">
+
+  <a href="https://shuchenglin-student.pages.dev/" target="_blank" class="work span-6">
+    <div class="work-bg-num">05</div>
+    <div class="work-head">
+      <div class="work-tag">PERSONAL · IP 营总结</div>
+      <div class="work-author">BY <b>水猫</b></div>
+    </div>
+    <h3 class="work-title">水猫的<br>IP 营个人总结</h3>
+    <div class="work-quote">叙事感染力超强。</div>
+    <div class="work-desc">
+      一个营友的自我档案。从"刷到好东西"到"自己也能做"的完整转变现场，
+      把这一段路程写成了一份可以被读完的故事。
+    </div>
+    <div class="work-footer">
+      <div class="work-cta">READ STORY ↗</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+
+  <a href="https://stormcrew-brand.vercel.app/" target="_blank" class="work span-3">
+    <div class="work-bg-num">06</div>
+    <div class="work-head">
+      <div class="work-tag">PERSONAL</div>
+      <div class="work-author">BY <b>小鲨鱼</b></div>
+    </div>
+    <h3 class="work-title">小鲨鱼的<br>IP 营总结</h3>
+    <div class="work-desc">做得很漂亮的品牌站 + 总结。</div>
+    <div class="work-footer">
+      <div class="work-cta">VISIT ↗</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+
+  <a href="https://stellular-centaur-267f1c.netlify.app/" target="_blank" class="work span-3">
+    <div class="work-bg-num">07</div>
+    <div class="work-head">
+      <div class="work-tag">PERSONAL</div>
+      <div class="work-author">25IP · VOL.001</div>
+    </div>
+    <h3 class="work-title">很强的<br>IP 营总结</h3>
+    <div class="work-desc">个人作品集 + 完整复盘。</div>
+    <div class="work-footer">
+      <div class="work-cta">VISIT ↗</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+
+</section>
+
+<!-- ============ CAPABILITY MATRIX · 能力矩阵 ============ -->
+<div class="section-head">
+  <div class="section-num">04 / 06</div>
+  <div class="section-title">能力矩阵 · 这群人能做什么</div>
+  <div class="section-sub">这不是清单，这是一份还在长的能力图谱。每一项都有人在做，每一项都可以接单。</div>
+</div>
+
+<section class="cap-matrix">
+
+  <!-- 顶部 LIVE 计数器 -->
+  <div class="cap-stats">
+    <div class="cap-stat">
+      <div class="cap-stat-num" data-target="200" data-suffix="+">0</div>
+      <div class="cap-stat-lbl">PROMPTS / 提示词出过的</div>
+    </div>
+    <div class="cap-stat">
+      <div class="cap-stat-num" data-target="80" data-suffix="+">0</div>
+      <div class="cap-stat-lbl">WEB PAGES / 网页跑出来的</div>
+    </div>
+    <div class="cap-stat">
+      <div class="cap-stat-num" data-target="500" data-suffix="+">0</div>
+      <div class="cap-stat-lbl">IMAGES / 神图生出来的</div>
+    </div>
+    <div class="cap-stat">
+      <div class="cap-stat-num" data-target="36" data-suffix="">0</div>
+      <div class="cap-stat-lbl">HOURS / 一个网页 0 → 1</div>
+    </div>
+    <div class="cap-stat">
+      <div class="cap-stat-num" data-text="∞">∞</div>
+      <div class="cap-stat-lbl">GROWING / 还在长的</div>
+    </div>
+  </div>
+
+  <!-- 标签云容器 -->
+  <div class="cap-cloud" id="capCloud">
+    <!-- JS 注入 -->
+  </div>
+
+  <!-- 底部一行号召 -->
+  <div class="cap-footer">
+    <div class="cap-footer-text">
+      <span style="color:var(--accent);">⬤ LIVE</span> &nbsp; 你想做的，这里可能已经有人做过。<br>
+      或者，<em style="color:var(--accent); font-style:normal;">下一个就是你写。</em>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============ SECTION 03: 视觉作品 ============ -->
+<div class="section-head">
+  <div class="section-num">05 / 06</div>
+  <div class="section-title">视觉作品 · 把人物做进画面里</div>
+  <div class="section-sub">把人物放进不同的视觉系统，看 AI 怎么塑造一个身份。</div>
+</div>
+
+<section class="works" style="border-bottom: 1px solid var(--border);">
+  <a href="https://wangjiemin.com/" target="_blank" class="work span-6">
+    <div class="work-bg-num">18</div>
+    <div class="work-head">
+      <div class="work-tag">AI ARCHIVE</div>
+      <div class="work-author">25IP · VOL.001</div>
+    </div>
+    <h3 class="work-title">树林 AI 写真档案馆</h3>
+    <div class="work-desc">
+      一个人的视觉档案。海报、杂志封面、撕裂拼贴、金属切片、红黑情绪、复古印刷——
+      用作品本身证明"AI 能不能产出有审美的东西"。
+    </div>
+    <div class="work-footer">
+      <div class="work-cta">VISIT ARCHIVE ↗</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+
+  <a href="https://shulin-ai-image-cup.pages.dev/" target="_blank" class="work span-6">
+    <div class="work-bg-num">19</div>
+    <div class="work-head">
+      <div class="work-tag">EXHIBITION</div>
+      <div class="work-author">25IP · VOL.001</div>
+    </div>
+    <h3 class="work-title">第一届 树林 AI 生图杯</h3>
+    <div class="work-desc">
+      群聊里的 AI 生图名场面档案。
+      不是一个人在炫技，是一群人在同一片土壤里互相投喂、互相超越。
+    </div>
+    <div class="work-footer">
+      <div class="work-cta">ENTER CUP ↗</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+
+  <a href="https://portrait-archive-v2.pages.dev" target="_blank" class="work span-12">
+    <div class="work-bg-num">20</div>
+    <div class="work-head">
+      <div class="work-tag">GALLERY · 3D EXHIBITION</div>
+      <div class="work-author">BY <b>同心</b></div>
+    </div>
+    <h3 class="work-title">TONGXIN GALLERY<br><span style="font-size:14px; color:var(--dim); font-weight:400;">AI Visual Archive · 2026</span></h3>
+    <div class="work-quote">视觉不是简单的好看，而是一次判断。</div>
+    <div class="work-desc">
+      3D 环绕展厅 + 平面循环画廊。同一人物放进不同的视觉系统：黑白杂志、撕裂拼贴、金属切片、红黑情绪、复古印刷与档案叙事——
+      展示的不是图片数量，而是一个人如何被构图、字体、光线和情绪反复塑造。
+    </div>
+    <div class="work-footer">
+      <div class="work-cta">ENTER GALLERY ↗</div>
+      <div class="work-arrow">↗</div>
+    </div>
+  </a>
+</section>
+
+<!-- ============ SECTION 04: 图像作品 ============ -->
+<div class="section-head">
+  <div class="section-num">06 / 06</div>
+  <div class="section-title">神图档案 · 群聊现场</div>
+  <div class="section-sub">67 张 AI 生图。这里只是冰山一角，每天还在长。</div>
+</div>
+
+<section class="gallery">
+  <div class="gallery-grid">
+    <div class="gallery-item" data-label="01 · ATTITUDE"></div>
+    <div class="gallery-item" data-label="02 · ERASURE"></div>
+    <div class="gallery-item" data-label="03 · REBEL"></div>
+    <div class="gallery-item" data-label="04"></div>
+    <div class="gallery-item" data-label="05"></div>
+    <div class="gallery-item" data-label="06"></div>
+    <div class="gallery-item" data-label="07"></div>
+    <div class="gallery-item" data-label="08"></div>
+    <div class="gallery-item" data-label="+59 MORE"></div>
+  </div>
+  <div class="gallery-note">
+    <b style="color:var(--accent);">// 关于这堵神图墙：</b><br>
+    这里有 67 张待上墙的 AI 生图（杂志封面 / 撕裂拼贴 / 素描海报 / 红黑情绪 / 写真）。
+    图片需要先传图床（imgbb / cloudflare）拿到链接后填进来，整面墙就活了。
+    样张已确认：ATTITUDE 杂志风、ERASURE 红黑撕裂拼贴（Design by Didida）、REBEL 素描双人海报。
+  </div>
+</section>
+
+<!-- ============ EXTRA LINKS ============ -->
+<div class="section-head">
+  <div class="section-num">+ / EXTRA</div>
+  <div class="section-title">还有更多 · 其他出口</div>
+  <div class="section-sub">这些是已经部署上线的工具站和现场记录。</div>
+</div>
+
+<section class="links-section">
+  <div class="links-grid">
+
+    <a href="https://cclearning.cn/" target="_blank" class="link-card">
+      <div class="link-card-num">22 / EDUCATION</div>
+      <div class="link-card-title">为什么要用<br>Claude Code</div>
+      <div class="link-card-footer">
+        <span>保姆级安装教程 · cclearning.cn</span>
+        <span class="link-arrow">↗</span>
+      </div>
+    </a>
+
+    <a href="https://eloquent-cheesecake-3db9bc.netlify.app/" target="_blank" class="link-card">
+      <div class="link-card-num">23 / SHOWCASE</div>
+      <div class="link-card-title">开场炫酷的<br>网页样本</div>
+      <div class="link-card-footer">
+        <span>仿 Shopify Editions Winter '26</span>
+        <span class="link-arrow">↗</span>
+      </div>
+    </a>
+
+    <a href="https://25ip-live-exhibition.pages.dev/" target="_blank" class="link-card">
+      <div class="link-card-num">24 / EXHIBITION</div>
+      <div class="link-card-title">25IP 作品现场<br>内测版</div>
+      <div class="link-card-footer">
+        <span style="color:var(--accent);">官方展览入口</span>
+        <span class="link-arrow">↗</span>
+      </div>
+    </a>
+
+    <a href="#" class="link-card" style="background: var(--card);">
+      <div class="link-card-num" style="color: var(--accent);">+ / 还在长</div>
+      <div class="link-card-title">更多作品<br>每天都在长出来</div>
+      <div class="link-card-footer">
+        <span>持续更新中</span>
+        <span class="link-arrow">∞</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ============ MANIFESTO ============ -->
+<section class="manifesto">
+  <div class="manifesto-text">
+    门槛从来不是<br>
+    "<em>会不会做</em>"。<br>
+    是"你，到底<em>想说什么</em>"。
+  </div>
+  <div class="manifesto-attr">— IP 营 · 一群已经在做的人</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>25IP / WORKS IN THE WILD · <span class="accent">VOL.001</span></div>
+  <div>A LIVE ARCHIVE · 2026.05.21</div>
+</footer>
+
+<script>
+  // ============ INTRO 打字机动画 ============
+  const introQuoteEl = document.getElementById('introQuote');
+  const introAttrEl = document.getElementById('introAttr');
+  const introEnterEl = document.getElementById('introEnter');
+  const introEl = document.getElementById('intro');
+
+  const quoteSegments = [
+    { text: '你不是来', delay: 300 },
+    { text: '学', highlight: true, delay: 400 },
+    { text: '的，', delay: 500 },
+    { text: '你早就', delay: 300 },
+    { text: '在做', highlight: true, delay: 400 },
+    { text: '了。', delay: 900 },
+    { text: '\n\n这里是 ', delay: 200 },
+    { text: '25 期 IP 营', highlight: true, delay: 500 },
+    { text: ' ——', delay: 400 },
+    { text: '\n一群正在被 ', delay: 300 },
+    { text: '现实评判', highlight: true, delay: 400 },
+    { text: ' 的人。', delay: 600 }
+  ];
+
+  async function playIntro() {
+    for (const seg of quoteSegments) {
+      if (seg.text.includes('\n')) {
+        const parts = seg.text.split('\n');
+        for (let i = 0; i < parts.length; i++) {
+          if (i > 0) introQuoteEl.appendChild(document.createElement('br'));
+          if (parts[i]) {
+            const sp = document.createElement('span');
+            sp.textContent = parts[i];
+            sp.style.transition = 'opacity 0.6s ease';
+            introQuoteEl.appendChild(sp);
+            await new Promise(r => setTimeout(r, 30));
+            sp.style.opacity = '1';
+          }
+        }
+      } else {
+        const span = document.createElement(seg.highlight ? 'em' : 'span');
+        span.textContent = seg.text;
+        span.style.transition = 'opacity 0.6s ease';
+        introQuoteEl.appendChild(span);
+        await new Promise(r => setTimeout(r, 30));
+        span.style.opacity = '1';
+      }
+      await new Promise(r => setTimeout(r, seg.delay));
+    }
+    await new Promise(r => setTimeout(r, 400));
+    introAttrEl.classList.add('show');
+    await new Promise(r => setTimeout(r, 800));
+    introEnterEl.classList.add('show');
+  }
+
+  function enterSite() {
+    introEl.classList.add('gone');
+    document.body.classList.remove('intro-active');
+    setTimeout(() => introEl.remove(), 1300);
+  }
+
+  // 启动
+  setTimeout(playIntro, 1200);
+
+  // 8秒后自动允许跳过
+  setTimeout(() => {
+    if (!introEnterEl.classList.contains('show')) {
+      introEnterEl.classList.add('show');
+    }
+  }, 8000);
+
+  // ============ 鼠标视差 ============
+  document.addEventListener('mousemove', (e) => {
+    const ghost = document.querySelector('.hero-ghost');
+    if (!ghost) return;
+    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+    ghost.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+  });
+
+  // ============ 滚动入场 ============
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.work, .link-card, .gallery-item').forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = `opacity 0.6s ease ${(i % 6) * 0.05}s, transform 0.6s ease ${(i % 6) * 0.05}s, background 0.4s`;
+    observer.observe(el);
+  });
+
+  // ============ 能力矩阵 · 计数器动画 ============
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.target);
+        const suffix = el.dataset.suffix || '';
+        if (el.dataset.text || isNaN(target)) return;
+        let current = 0;
+        const duration = 2000;
+        const startTime = performance.now();
+        function tick(now) {
+          const progress = Math.min((now - startTime) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+          current = Math.floor(target * eased);
+          el.textContent = current + suffix;
+          if (progress < 1) requestAnimationFrame(tick);
+          else el.textContent = target + suffix;
+        }
+        requestAnimationFrame(tick);
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.cap-stat-num').forEach(el => counterObserver.observe(el));
+
+  // ============ 标签云 · 能力标签 ============
+  const TAGS = [
+    // —— 视觉类（lg / 大） ——
+    { text: '杂志封面', size: 'lg', hot: true },
+    { text: '撕裂拼贴', size: 'lg' },
+    { text: '素描海报', size: 'lg' },
+    { text: '人物写真', size: 'lg', hot: true },
+    { text: '红黑情绪', size: 'lg' },
+    { text: '金属切片', size: 'md' },
+    { text: '复古印刷', size: 'md' },
+    { text: '像素游戏风', size: 'md' },
+    { text: '黑白电影', size: 'md' },
+    { text: '科技终端', size: 'md' },
+    { text: '古风水墨', size: 'md' },
+    { text: '撒野街拍', size: 'sm' },
+    { text: '日杂软糖', size: 'sm' },
+    { text: '冷淡极简', size: 'sm' },
+    { text: '霓虹赛博', size: 'sm' },
+
+    // —— 网页类型 ——
+    { text: '个人作品集', size: 'lg', hot: true },
+    { text: '品牌站', size: 'md' },
+    { text: '滚动叙事网页', size: 'lg' },
+    { text: '互动剧网页', size: 'md', hot: true },
+    { text: '直播复盘站', size: 'md' },
+    { text: '工作流文档', size: 'sm' },
+    { text: '宣言短片', size: 'md' },
+    { text: '思维模型站', size: 'sm' },
+    { text: 'AI 工具教程', size: 'sm' },
+    { text: '3D 画廊', size: 'md' },
+    { text: '生图档案馆', size: 'md' },
+    { text: 'Landing Page', size: 'sm' },
+    { text: '仿站精品', size: 'sm' },
+    { text: '产品介绍页', size: 'sm' },
+    { text: '电子杂志', size: 'sm' },
+
+    // —— 文案类 ——
+    { text: '观点短文', size: 'md' },
+    { text: '直播文字稿', size: 'sm' },
+    { text: '广告金句', size: 'md', hot: true },
+    { text: '小红书文案', size: 'sm' },
+    { text: '公众号长文', size: 'sm' },
+    { text: '朋友圈狠话', size: 'sm' },
+    { text: '产品文案', size: 'sm' },
+    { text: '品牌 Slogan', size: 'sm' },
+    { text: '深度长文', size: 'md' },
+
+    // —— 影像 / 媒体 ——
+    { text: 'AI 短剧', size: 'lg', hot: true },
+    { text: '文案短片 V3', size: 'md' },
+    { text: 'HTML 视频', size: 'md' },
+    { text: 'BGM 配音', size: 'sm' },
+    { text: '分镜脚本', size: 'sm' },
+    { text: '镜头连续性', size: 'sm' },
+    { text: '人物档案锁定', size: 'sm' },
+
+    // —— 工具 / 工程 ——
+    { text: 'Claude Code', size: 'md', hot: true },
+    { text: 'Codex', size: 'sm' },
+    { text: 'MiniMax 音频', size: 'sm' },
+    { text: 'Cursor', size: 'sm' },
+    { text: 'MCP', size: 'sm' },
+    { text: 'Prompt 模板', size: 'sm' },
+    { text: 'Skill 系统', size: 'sm' },
+    { text: '部署一条龙', size: 'sm' },
+    { text: '小程序', size: 'md' },
+    { text: 'Chrome 插件', size: 'sm' },
+    { text: '自动化脚本', size: 'sm' },
+    { text: '一键发布', size: 'sm' },
+
+    // —— 风格 / 状态词 ——
+    { text: 'IN THE WILD', size: 'sm', blink: true },
+    { text: 'GROWING', size: 'sm', blink: true },
+    { text: 'LIVE', size: 'sm', blink: true },
+    { text: 'OPEN SOURCE', size: 'sm' },
+    { text: 'NO TEAM', size: 'sm' },
+    { text: '一人成军', size: 'md' },
+    { text: '审美驱动', size: 'sm' },
+    { text: '内容驱动', size: 'sm' },
+  ];
+
+  function renderCloud() {
+    const cloud = document.getElementById('capCloud');
+    if (!cloud) return;
+    const W = cloud.offsetWidth;
+    const H = cloud.offsetHeight;
+
+    // 简易非重叠布局：分网格放
+    const placed = [];
+    function overlaps(x, y, w, h) {
+      for (const p of placed) {
+        if (x < p.x + p.w + 8 && x + w + 8 > p.x && y < p.y + p.h + 8 && y + h + 8 > p.y) return true;
+      }
+      return false;
+    }
+
+    const shuffled = [...TAGS].sort(() => Math.random() - 0.5);
+
+    shuffled.forEach((tag, i) => {
+      const el = document.createElement('div');
+      el.className = 'cap-tag';
+      if (tag.size === 'lg') el.classList.add('t-lg');
+      else if (tag.size === 'md') el.classList.add('t-md');
+      if (tag.hot) el.classList.add('t-hot');
+      if (tag.blink) el.classList.add('t-blink');
+      el.textContent = tag.text;
+      el.style.animationDelay = (i * 0.04) + 's';
+
+      // 临时挂载测量尺寸
+      el.style.visibility = 'hidden';
+      cloud.appendChild(el);
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+
+      // 尝试找一个不重叠的位置
+      let placed_ok = false;
+      for (let attempt = 0; attempt < 60; attempt++) {
+        const x = Math.random() * (W - w - 20) + 10;
+        const y = Math.random() * (H - h - 20) + 10;
+        if (!overlaps(x, y, w, h)) {
+          el.style.left = x + 'px';
+          el.style.top = y + 'px';
+          placed.push({ x, y, w, h });
+          placed_ok = true;
+          break;
+        }
+      }
+      if (!placed_ok) {
+        // 放不下就移除
+        el.remove();
+        return;
+      }
+
+      // 随机给部分标签加 floating 浮动
+      if (Math.random() < 0.4 && !tag.blink) {
+        el.classList.add('floating');
+        el.style.animationDelay = `${i * 0.04}s, ${Math.random() * 3}s`;
+      }
+
+      el.style.visibility = 'visible';
+    });
+  }
+
+  // 等 DOM 就绪后渲染
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(renderCloud, 300));
+  } else {
+    setTimeout(renderCloud, 300);
+  }
+
+  // 窗口变化重渲
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const cloud = document.getElementById('capCloud');
+      if (cloud) {
+        cloud.innerHTML = '';
+        renderCloud();
+      }
+    }, 300);
+  });
+</script>
+
+</body>
+</html>
