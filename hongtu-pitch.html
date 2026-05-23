@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>红兔 · ZERO TO ONE · 黑客松路演</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  /* ==================== 基础变量 ==================== */
+  :root{
+    --bg: #F5F1EA;
+    --bg-deep: #EDE7DA;
+    --ink: #0E0E0E;
+    --ink-2: #2A2A2A;
+    --ink-3: #6B6B68;
+    --line: #D9D2C2;
+    --red: #FF2E4D;
+    --red-soft: #FF2E4D1A;
+    --green: #1F4D3F;
+    --green-soft: #1F4D3F1A;
+    --gold: #B8894B;
+
+    --font-sans: "Noto Sans SC", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: "Noto Sans SC", "PingFang SC", sans-serif;
+    --font-serif: "Noto Serif SC", "Songti SC", serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  *{ box-sizing: border-box; margin: 0; padding: 0; }
+  html, body{
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ==================== Deck 容器 ==================== */
+  .deck{
+    position: fixed; inset: 0;
+    overflow: hidden;
+  }
+  .slides{
+    position: relative;
+    width: 100%; height: 100%;
+    display: flex;
+    transition: transform 900ms cubic-bezier(.7,.05,.2,1);
+    will-change: transform;
+  }
+  .slide{
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%; height: 100%;
+    overflow: hidden;
+  }
+
+  /* 极淡网格纹理（噪点替代方案：CSS 微噪点） */
+  .slide::before{
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(14,14,14,.025) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(14,14,14,.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide::after{
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(31,77,63,.04), transparent 50%),
+      radial-gradient(ellipse at 100% 100%, rgba(255,46,77,.04), transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ==================== 顶栏（每页） ==================== */
+  .topbar{
+    position: absolute;
+    top: 28px; left: 36px; right: 36px;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 5;
+    font-size: 14px;
+  }
+  .brand{
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 14px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: var(--bg);
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+  .brand .rabbit{
+    width: 16px; height: 16px;
+    background: var(--red);
+    border-radius: 50%;
+    position: relative;
+  }
+  .brand .rabbit::before,
+  .brand .rabbit::after{
+    content: ""; position: absolute;
+    width: 4px; height: 8px;
+    background: var(--red);
+    border-radius: 2px 2px 0 0;
+    top: -6px;
+  }
+  .brand .rabbit::before{ left: 2px; transform: rotate(-12deg); }
+  .brand .rabbit::after { right: 2px; transform: rotate(12deg); }
+
+  .topbar-center{
+    display: inline-flex; background: var(--ink); border-radius: 999px; padding: 4px;
+  }
+  .topbar-center span{
+    padding: 6px 16px; font-size: 13px; color: #fff;
+    border-radius: 999px;
+  }
+  .topbar-center span.active{ background: var(--bg); color: var(--ink); font-weight: 600; }
+
+  .topbar-right{
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .tag{
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    font-size: 13px;
+    background: var(--bg);
+  }
+  .tag .dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .tag.red .dot{ background: var(--red); }
+  .tag.green .dot{ background: var(--green); }
+  .pagenum{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    padding: 6px 14px;
+    background: var(--bg);
+  }
+  .progress-ring{
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+    position: relative;
+  }
+  .progress-ring::after{
+    content: ""; position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--ink);
+    clip-path: polygon(50% 50%, 100% 50%, 100% 0, 50% 0);
+  }
+
+  /* ==================== 通用内容容器 ==================== */
+  .body{
+    position: absolute;
+    top: 90px; left: 60px; right: 60px; bottom: 60px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+  }
+  .eyebrow{
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before{
+    content: ""; width: 28px; height: 1px; background: var(--green);
+  }
+
+  /* 大字报标题 */
+  .megatitle{
+    font-family: var(--font-display);
+    font-weight: 900;
+    color: var(--ink);
+    line-height: .95;
+    letter-spacing: -.02em;
+    font-size: clamp(72px, 8.5vw, 168px);
+  }
+  .megatitle .em{ color: var(--red); }
+  .megatitle .green{ color: var(--green); }
+
+  /* 文字遮罩揭开动画 */
+  .reveal{
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+  }
+  .reveal > span{
+    display: inline-block;
+    transform: translateY(110%);
+    transition: transform 1100ms cubic-bezier(.7,.05,.2,1);
+  }
+  .active .reveal > span{ transform: translateY(0); }
+  .active .reveal:nth-child(2) > span{ transition-delay: 120ms; }
+  .active .reveal:nth-child(3) > span{ transition-delay: 240ms; }
+  .active .reveal:nth-child(4) > span{ transition-delay: 360ms; }
+
+  /* 淡入上浮卡片 */
+  .fade-up{
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 800ms ease, transform 800ms cubic-bezier(.2,.7,.2,1);
+  }
+  .active .fade-up{ opacity: 1; transform: translateY(0); }
+  .active .fade-up.d1{ transition-delay: 200ms; }
+  .active .fade-up.d2{ transition-delay: 350ms; }
+  .active .fade-up.d3{ transition-delay: 500ms; }
+  .active .fade-up.d4{ transition-delay: 650ms; }
+  .active .fade-up.d5{ transition-delay: 800ms; }
+  .active .fade-up.d6{ transition-delay: 950ms; }
+
+  /* ==================== 导航 ==================== */
+  .nav{
+    position: fixed;
+    bottom: 24px; left: 50%; transform: translateX(-50%);
+    z-index: 10;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 10px;
+    background: var(--ink);
+    border-radius: 999px;
+    box-shadow: 0 10px 40px rgba(0,0,0,.15);
+  }
+  .nav button{
+    background: transparent;
+    color: #fff;
+    border: none;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background .2s;
+  }
+  .nav button:hover{ background: rgba(255,255,255,.15); }
+  .nav .dots{
+    display: inline-flex; gap: 6px; padding: 0 8px;
+  }
+  .nav .dots i{
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,.3);
+    transition: all .3s;
+    cursor: pointer;
+    display: inline-block;
+  }
+  .nav .dots i.on{ background: #fff; width: 18px; border-radius: 3px; }
+
+  .hint{
+    position: fixed; bottom: 24px; right: 28px; z-index: 10;
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--ink-3);
+    letter-spacing: .1em;
+  }
+
+  /* ==================== P1 封面 ==================== */
+  .cover .body{
+    justify-content: space-between;
+  }
+  .cover-top{
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding-top: 30px;
+  }
+  .cover-meta{
+    font-family: var(--font-mono);
+    font-size: 13px; color: var(--ink-3);
+    letter-spacing: .1em;
+    line-height: 1.9;
+  }
+  .cover-meta b{ color: var(--ink); font-weight: 700; }
+  .cover-bigmark{
+    font-family: var(--font-mono);
+    font-size: 13px; color: var(--ink-3);
+    text-align: right;
+    line-height: 1.9;
+    letter-spacing: .1em;
+  }
+  .cover-title{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(140px, 16vw, 320px);
+    line-height: .85;
+    letter-spacing: -.04em;
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .cover-title .ch{
+    display: inline-block;
+    position: relative;
+    opacity: 0;
+    transform: translateY(40px) scale(.95);
+    transition: opacity 900ms cubic-bezier(.2,.7,.2,1), transform 900ms cubic-bezier(.2,.7,.2,1);
+  }
+  .active .cover-title .ch{ opacity: 1; transform: translateY(0) scale(1); }
+  .active .cover-title .ch:nth-child(1){ transition-delay: 200ms; }
+  .active .cover-title .ch:nth-child(2){ transition-delay: 450ms; color: var(--red); }
+  /* 红色光晕从字底扩散 */
+  .cover-title .ch::after{
+    content: "";
+    position: absolute;
+    left: 50%; bottom: 8%;
+    width: 0; height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,46,77,.45), rgba(255,46,77,0) 70%);
+    transform: translate(-50%, 50%);
+    pointer-events: none;
+    transition: width 1400ms ease, height 1400ms ease, opacity 1400ms ease;
+    opacity: 0;
+    z-index: -1;
+  }
+  .active .cover-title .ch:nth-child(2)::after{
+    width: 600px; height: 600px;
+    opacity: 1;
+    transition-delay: 700ms;
+  }
+
+  .cover-tagline{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(22px, 1.8vw, 32px);
+    color: var(--ink-2);
+    line-height: 1.5;
+    max-width: 900px;
+    margin-bottom: 40px;
+    min-height: 100px;
+  }
+  .cover-tagline .typed{ display: inline; }
+  .cover-tagline .caret{
+    display: inline-block;
+    width: 3px; height: 1em;
+    background: var(--red);
+    vertical-align: -3px;
+    margin-left: 4px;
+    animation: blink 800ms steps(2) infinite;
+  }
+  @keyframes blink{ 50%{ opacity: 0; } }
+
+  .cover-bottom{
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .cover-team{
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .team-label{
+    font-family: var(--font-mono);
+    font-size: 12px; color: var(--ink-3);
+    letter-spacing: .2em;
+  }
+  .team-name{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 38px;
+    letter-spacing: -.01em;
+  }
+  .team-name .arrow{
+    display: inline-block;
+    color: var(--red);
+    transform: translateY(-2px);
+  }
+  .cover-stamp{
+    display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: .1em;
+  }
+  .stamp-box{
+    border: 1.5px dashed var(--ink-3);
+    padding: 14px 22px;
+    border-radius: 4px;
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: .15em;
+    transform: rotate(-2deg);
+    background: var(--bg);
+  }
+
+  /* ==================== P2 用户与问题 ==================== */
+  .p2 .body, .p3 .body{
+    padding-top: 50px;
+    gap: 36px;
+  }
+  .row-list{
+    margin-top: auto;
+    margin-bottom: 40px;
+    display: flex; flex-direction: column;
+  }
+  .row{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: center;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-display);
+  }
+  .row:first-child{ border-top: 1px solid var(--line); }
+  .row .k{
+    font-size: 26px; font-weight: 700; color: var(--ink);
+  }
+  .row .v{
+    font-size: 16px; color: var(--ink-3);
+    font-family: var(--font-mono);
+    letter-spacing: .02em;
+  }
+  .row .v b{ color: var(--red); font-weight: 700; font-family: var(--font-display); font-size: 18px; }
+
+  /* P2 数据 hero */
+  .hero-stats{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-bottom: 20px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-stat{
+    padding: 24px 0;
+    border-right: 1px solid var(--line);
+  }
+  .hero-stat:last-child{ border-right: none; padding-left: 30px; }
+  .hero-stat:not(:first-child){ padding-left: 30px; }
+  .hero-stat .num{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 64px;
+    line-height: 1;
+    letter-spacing: -.02em;
+    color: var(--ink);
+  }
+  .hero-stat .num .unit{ font-size: 26px; color: var(--ink-3); margin-left: 4px; font-weight: 700; }
+  .hero-stat .num .red{ color: var(--red); }
+  .hero-stat .lbl{
+    margin-top: 10px;
+    font-size: 13px; color: var(--ink-3);
+    font-family: var(--font-mono);
+    letter-spacing: .05em;
+  }
+
+  /* ==================== P3 现有方案 ==================== */
+  .vs-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: auto; margin-bottom: 20px;
+  }
+  .vs-card{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px 26px 22px;
+    min-height: 220px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .vs-card .label{
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--ink-3);
+    letter-spacing: .15em;
+    margin-bottom: 14px;
+  }
+  .vs-card h3{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 28px;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: -.01em;
+  }
+  .vs-card p{
+    font-size: 14px; color: var(--ink-3); line-height: 1.7;
+    margin-top: auto;
+  }
+  .vs-card .x{
+    position: absolute; top: 22px; right: 22px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--red-soft);
+    color: var(--red);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700;
+  }
+
+  /* ==================== P4 产品 Demo ==================== */
+  .p4 .body{ flex-direction: row; gap: 60px; padding-top: 80px; }
+  .p4-left{
+    flex: 0 0 360px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .phone{
+    width: 320px; height: 640px;
+    background: #1a1a1a;
+    border-radius: 42px;
+    padding: 12px;
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.15),
+      0 6px 18px rgba(0,0,0,.08),
+      inset 0 0 0 1px rgba(255,255,255,.05);
+    position: relative;
+  }
+  .phone::before{
+    content: ""; position: absolute;
+    top: 22px; left: 50%; transform: translateX(-50%);
+    width: 100px; height: 24px;
+    background: #000; border-radius: 14px;
+  }
+  .phone-screen{
+    width: 100%; height: 100%;
+    background: #FFE9EC;
+    border-radius: 30px;
+    overflow: hidden;
+    position: relative;
+    padding: 50px 16px 16px;
+  }
+  .phone-header{
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .phone-header .logo-mini{
+    width: 36px; height: 36px;
+    background: #fff;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(255,46,77,.2);
+  }
+  .phone-header .logo-mini::before{
+    content: ""; width: 18px; height: 18px; background: var(--red); border-radius: 50%;
+  }
+  .phone-header h4{
+    font-size: 17px; font-weight: 900; color: var(--red);
+    margin-bottom: 2px;
+  }
+  .phone-header p{ font-size: 10px; color: #999; }
+  .phone-card{
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(255,46,77,.06);
+  }
+  .phone-card h5{
+    font-size: 12px; color: var(--red); font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .phone-card h5::before{ content: ""; width: 3px; height: 12px; background: var(--red); border-radius: 2px; }
+  .score-row{
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .score-row .lbl{ font-size: 10px; color: #555; width: 56px; }
+  .score-row .bar{
+    flex: 1; height: 6px; background: #f3e4e6; border-radius: 3px; overflow: hidden;
+  }
+  .score-row .bar i{ display: block; height: 100%; background: linear-gradient(to right, var(--red), #ff7d92); border-radius: 3px; }
+  .score-row .v{ font-size: 10px; color: var(--red); font-weight: 700; width: 28px; text-align: right; }
+  .phone-overall{
+    background: var(--red);
+    color: #fff;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 6px 16px rgba(255,46,77,.3);
+  }
+  .phone-overall .l{ font-size: 11px; opacity: .9; }
+  .phone-overall .l b{ display: block; font-size: 15px; margin-top: 2px; font-weight: 900; }
+  .phone-overall .r{
+    font-family: var(--font-display);
+    font-weight: 900; font-size: 32px; line-height: 1;
+  }
+  .phone-overall .r small{ font-size: 14px; opacity: .8; }
+
+  .p4-right{
+    flex: 1;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    padding-right: 20px;
+  }
+  .p4-headline{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(56px, 5.5vw, 96px);
+    line-height: .98;
+    letter-spacing: -.02em;
+    margin-bottom: 50px;
+  }
+  .p4-headline .red{ color: var(--red); }
+  .steps{
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 30px;
+  }
+  .step{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 22px 20px;
+    min-height: 200px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .step .n{
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--ink-3);
+    letter-spacing: .15em;
+    margin-bottom: 12px;
+  }
+  .step h4{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .step p{
+    font-size: 13px; color: var(--ink-3); line-height: 1.6;
+    margin-top: auto;
+  }
+  .step .badge{
+    position: absolute; top: 20px; right: 20px;
+    width: 28px; height: 28px;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  .arrow-flow{
+    align-self: center;
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(to right, var(--line) 50%, transparent 50%);
+    background-size: 8px 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .arrow-flow::after{
+    content: "";
+    position: absolute;
+    top: 0; left: -30px;
+    width: 30px; height: 100%;
+    background: linear-gradient(to right, transparent, var(--red), transparent);
+    animation: flow 1.8s linear infinite;
+  }
+  @keyframes flow{
+    0%{ left: -30px; }
+    100%{ left: 100%; }
+  }
+  .arrow-flow::before{
+    content: "";
+    position: absolute; right: -1px; top: 50%;
+    width: 0; height: 0;
+    border-left: 8px solid var(--red);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transform: translateY(-50%);
+  }
+
+  .p4-callout{
+    display: inline-flex;
+    align-items: baseline; gap: 14px;
+    padding: 14px 22px;
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 999px;
+    align-self: flex-start;
+  }
+  .p4-callout .big{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 28px;
+    color: var(--red);
+  }
+  .p4-callout .txt{
+    font-size: 14px;
+    letter-spacing: .03em;
+  }
+
+  /* ==================== P5 商业化验证 ==================== */
+  .p5 .body{ padding-top: 50px; }
+  .p5-grid{
+    display: grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap: 36px;
+    margin-top: auto;
+    align-items: stretch;
+  }
+  .stat-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 14px;
+  }
+  .stat-card{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px 26px 22px;
+    position: relative;
+    min-height: 160px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .stat-card.dark{ background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .stat-card.dark .lbl{ color: rgba(245,241,234,.6); }
+  .stat-card.dark .delta{ color: var(--red); }
+  .stat-card .lbl{
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--ink-3);
+    letter-spacing: .15em;
+  }
+  .stat-card .num{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 64px; line-height: 1;
+    letter-spacing: -.02em;
+  }
+  .stat-card .num .unit{ font-size: 22px; font-weight: 700; margin-left: 4px; opacity: .65; }
+  .stat-card .delta{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--green);
+    letter-spacing: .05em;
+  }
+
+  .screenshot-stack{
+    position: relative;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+    overflow: hidden;
+  }
+  .screenshot-stack .label{
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--ink-3);
+    letter-spacing: .15em;
+    margin-bottom: 14px;
+  }
+  .chat-mock{
+    background: #f7f4ec;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    border-left: 3px solid var(--green);
+    position: relative;
+  }
+  .chat-mock.user{ border-left-color: var(--red); }
+  .chat-mock .who{
+    font-family: var(--font-mono);
+    font-size: 10px; color: var(--ink-3);
+    letter-spacing: .1em;
+    margin-bottom: 4px;
+  }
+  .chat-mock .pay{
+    display: inline-block;
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 6px;
+    font-weight: 700;
+  }
+
+  /* ==================== P6 商业模式 ==================== */
+  .p6 .body{ padding-top: 50px; }
+  .price-grid{
+    display: grid;
+    grid-template-columns: 1fr 1.1fr 1fr;
+    gap: 18px;
+    margin-top: auto;
+    margin-bottom: 20px;
+  }
+  .price-card{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px 28px 26px;
+    display: flex; flex-direction: column;
+    min-height: 360px;
+    position: relative;
+  }
+  .price-card.featured{
+    background: var(--ink); color: var(--bg);
+    border-color: var(--ink);
+    transform: scale(1.02);
+    box-shadow: 0 18px 50px rgba(0,0,0,.18);
+  }
+  .price-card.featured .tag-mini{ background: var(--red); color: #fff; }
+  .price-card.featured .lbl{ color: rgba(245,241,234,.65); }
+  .price-card.featured ul li{ color: rgba(245,241,234,.85); }
+  .price-card.featured ul li::before{ background: var(--red); }
+
+  .price-card .tag-mini{
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .15em;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--bg-deep);
+    color: var(--ink-3);
+    margin-bottom: 16px;
+  }
+  .price-card h3{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 36px;
+    line-height: 1;
+    margin-bottom: 6px;
+    letter-spacing: -.01em;
+  }
+  .price-card .lbl{
+    font-size: 12px; color: var(--ink-3);
+    margin-bottom: 18px;
+  }
+  .price-card .price{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 56px;
+    line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: -.02em;
+  }
+  .price-card .price small{ font-size: 16px; opacity: .6; margin-left: 4px; font-weight: 700; }
+  .price-card .price.red{ color: var(--red); }
+  .price-card .unit-line{
+    font-size: 12px; color: var(--ink-3);
+    margin-bottom: 18px;
+    font-family: var(--font-mono);
+  }
+  .price-card ul{
+    list-style: none; margin-top: 14px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+  .price-card.featured ul{ border-top-color: rgba(245,241,234,.15); }
+  .price-card ul li{
+    font-size: 13px; color: var(--ink-2);
+    line-height: 1.5;
+    padding: 7px 0 7px 18px;
+    position: relative;
+  }
+  .price-card ul li::before{
+    content: "";
+    position: absolute;
+    left: 0; top: 14px;
+    width: 8px; height: 1.5px;
+    background: var(--ink);
+  }
+
+  /* ==================== P7 团队 ==================== */
+  .p7 .body{ padding-top: 50px; }
+  .team-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 30px;
+    margin-top: auto;
+  }
+  .skill-card{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    min-height: 200px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-card::before{
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle at top right, var(--green-soft), transparent 70%);
+  }
+  .skill-card.red::before{ background: radial-gradient(circle at top right, var(--red-soft), transparent 70%); }
+  .skill-card .n{
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--green);
+    letter-spacing: .15em;
+  }
+  .skill-card.red .n{ color: var(--red); }
+  .skill-card h4{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 30px;
+    line-height: 1.1;
+    margin-top: 14px;
+  }
+  .skill-card p{
+    font-size: 12px; color: var(--ink-3); line-height: 1.6;
+    margin-top: 12px;
+  }
+  .p7-conclusion{
+    border-top: 1px solid var(--line);
+    padding-top: 22px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .p7-conclusion .big{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 36px;
+    letter-spacing: -.01em;
+  }
+  .p7-conclusion .big .red{ color: var(--red); }
+  .p7-conclusion .small{
+    font-family: var(--font-mono);
+    font-size: 12px; color: var(--ink-3);
+    letter-spacing: .1em;
+  }
+
+  /* ==================== P8 下一步 ==================== */
+  .p8 .body{ padding-top: 50px; }
+  .timeline{
+    margin-top: auto;
+    margin-bottom: 30px;
+    position: relative;
+  }
+  .timeline-line{
+    position: absolute;
+    left: 0; right: 0; top: 78px;
+    height: 2px;
+    background: var(--ink);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 1400ms cubic-bezier(.7,.05,.2,1) 200ms;
+  }
+  .active .timeline-line{ transform: scaleX(1); }
+  .timeline-row{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    position: relative;
+  }
+  .tl-node{
+    padding-top: 50px;
+    padding-right: 30px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(16px) scale(.85);
+    transition: opacity 600ms cubic-bezier(.4,1.6,.6,1), transform 600ms cubic-bezier(.4,1.6,.6,1);
+  }
+  .active .tl-node{ opacity: 1; transform: translateY(0) scale(1); }
+  .active .tl-node:nth-child(1){ transition-delay: 1100ms; }
+  .active .tl-node:nth-child(2){ transition-delay: 1300ms; }
+  .active .tl-node:nth-child(3){ transition-delay: 1500ms; }
+  .tl-node::before{
+    content: "";
+    position: absolute;
+    top: 22px; left: 0;
+    width: 18px; height: 18px;
+    background: var(--bg);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+  }
+  .tl-node::after{
+    content: "";
+    position: absolute;
+    top: 28px; left: 6px;
+    width: 6px; height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+  }
+  .tl-node .when{
+    font-family: var(--font-mono);
+    font-size: 12px; color: var(--ink-3);
+    letter-spacing: .15em;
+    margin-bottom: 10px;
+  }
+  .tl-node h4{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 30px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: -.01em;
+  }
+  .tl-node ul{ list-style: none; }
+  .tl-node ul li{
+    font-size: 13px; color: var(--ink-2);
+    line-height: 1.7;
+    padding-left: 14px;
+    position: relative;
+  }
+  .tl-node ul li::before{
+    content: "→";
+    position: absolute; left: 0; top: 0;
+    color: var(--red);
+    font-weight: 700;
+  }
+
+  .p8-end{
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .p8-end .l{
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 28px;
+  }
+  .p8-end .l .red{ color: var(--red); }
+  .p8-end .r{
+    font-family: var(--font-mono);
+    font-size: 12px; color: var(--ink-3);
+    letter-spacing: .1em;
+  }
+
+  /* ==================== Misc ==================== */
+  ::selection{ background: var(--red); color: #fff; }
+
+  /* 隐藏滚动条但可滚 */
+  body{ scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+  <div class="slides" id="slides">
+
+    <!-- ================= P1 封面 ================= -->
+    <section class="slide cover" data-tag-color="red" data-tag-text="封面" data-page="01">
+      <div class="topbar">
+        <div class="brand"><span class="rabbit"></span> 红兔 · ZERO TO ONE</div>
+        <div class="topbar-center">
+          <span class="active">路演分享</span><span>启动分享</span>
+        </div>
+        <div class="topbar-right">
+          <div class="tag red"><span class="dot"></span>封面</div>
+          <div class="pagenum">01 / 08</div>
+          <div class="progress-ring"></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="cover-top">
+          <div class="cover-meta">
+            <div>— ZERO TO ONE × HACKATHON 2026</div>
+            <div><b>赛道：</b>AI × CONTENT</div>
+            <div><b>日期：</b>2026 / 05 / 24</div>
+          </div>
+          <div class="cover-bigmark">
+            PROJECT NO.<br/>
+            <b style="font-size:24px; color: var(--ink);">RED · 01</b>
+          </div>
+        </div>
+
+        <div>
+          <div class="eyebrow" style="margin-bottom: 28px;">PROJECT NAME</div>
+          <h1 class="cover-title">
+            <span class="ch">红</span><span class="ch">兔</span>
+          </h1>
+          <p class="cover-tagline">
+            <span class="typed" id="typed"></span><span class="caret"></span>
+          </p>
+        </div>
+
+        <div class="cover-bottom">
+          <div class="cover-team">
+            <div class="team-label">— TEAM</div>
+            <div class="team-name">ZERO <span class="arrow">→</span> ONE</div>
+          </div>
+          <div class="cover-stamp">
+            <div>— SUBMISSION</div>
+            <div class="stamp-box">DEMO READY</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= P2 用户与问题 ================= -->
+    <section class="slide p2" data-page="02">
+      <div class="topbar">
+        <div class="brand"><span class="rabbit"></span> 红兔 · ZERO TO ONE</div>
+        <div class="topbar-center"><span class="active">路演分享</span><span>启动分享</span></div>
+        <div class="topbar-right">
+          <div class="tag"><span class="dot"></span>用户与问题</div>
+          <div class="pagenum">02 / 08</div>
+          <div class="progress-ring"></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">— USER &amp; PROBLEM</div>
+        <h2 class="megatitle" style="margin-top: 24px;">
+          <span class="reveal"><span>花 2 小时做封面，</span></span><br/>
+          <span class="reveal"><span><span class="em">打开率</span>却不到 5%。</span></span>
+        </h2>
+
+        <div class="hero-stats fade-up d3">
+          <div class="hero-stat">
+            <div class="num" data-count="2"><span class="counter">0</span><span class="unit">小时 / 张</span></div>
+            <div class="lbl">— 创作者制图耗时</div>
+          </div>
+          <div class="hero-stat">
+            <div class="num"><span class="red"><span class="counter" data-count="4.8">0</span></span><span class="unit">%</span></div>
+            <div class="lbl">— 平均封面点击率</div>
+          </div>
+          <div class="hero-stat">
+            <div class="num"><span class="counter" data-count="73">0</span><span class="unit">%</span></div>
+            <div class="lbl">— 创作者：「不知道哪里不行」</div>
+          </div>
+        </div>
+
+        <div class="row-list" style="margin-top: 0;">
+          <div class="row fade-up d4">
+            <div class="k">辛苦做的封面，没人点</div>
+            <div class="v">问题：<b>不知道哪里不行</b></div>
+          </div>
+          <div class="row fade-up d5">
+            <div class="k">不懂小红书算法和审美</div>
+            <div class="v">问题：<b>凭感觉做、没参照</b></div>
+          </div>
+          <div class="row fade-up d6">
+            <div class="k">改一版要 30 分钟</div>
+            <div class="v">问题：<b>试错成本高</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= P3 现有方案 ================= -->
+    <section class="slide p3" data-page="03">
+      <div class="topbar">
+        <div class="brand"><span class="rabbit"></span> 红兔 · ZERO TO ONE</div>
+        <div class="topbar-center"><span class="active">路演分享</span><span>启动分享</span></div>
+        <div class="topbar-right">
+          <div class="tag"><span class="dot"></span>现有方案</div>
+          <div class="pagenum">03 / 08</div>
+          <div class="progress-ring"></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">— WHY EXISTING TOOLS FAIL</div>
+        <h2 class="megatitle" style="margin-top: 24px;">
+          <span class="reveal"><span>市面上的工具，</span></span><br/>
+          <span class="reveal"><span>没一个<span class="em">懂小红书</span>。</span></span>
+        </h2>
+
+        <div class="vs-grid">
+          <div class="vs-card fade-up d3">
+            <div class="x">✕</div>
+            <div class="label">OPTION 01 — 通用 AI 设计工具</div>
+            <h3>不懂小红书算法</h3>
+            <p>Canva、Midjourney 做出来的图很好看，但放到小红书首页一点不出彩。完全没有平台基因。</p>
+          </div>
+          <div class="vs-card fade-up d4">
+            <div class="x">✕</div>
+            <div class="label">OPTION 02 — 模板站 / 套图</div>
+            <h3>模板太套路</h3>
+            <p>千篇一律的爆款标题样式，一眼模板，平台算法和用户都已经审美疲劳，点击率持续下滑。</p>
+          </div>
+          <div class="vs-card fade-up d5">
+            <div class="x">✕</div>
+            <div class="label">OPTION 03 — 找设计师</div>
+            <h3>太贵 &amp; 太慢</h3>
+            <p>单张封面 200–500 元，改一稿等一天，对日更内容的小红书创作者完全不现实。</p>
+          </div>
+        </div>
+
+        <div class="row" style="border: none; padding: 16px 0 0; opacity: .7;">
+          <div class="k" style="font-size: 18px; color: var(--ink-3); font-family: var(--font-mono); letter-spacing: .1em;">— SO WE BUILT</div>
+          <div class="v" style="font-size: 16px;"><b style="font-family: var(--font-display); font-size: 22px;">一把垂直小红书封面的"AI 听诊器"</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= P4 产品 Demo ================= -->
+    <section class="slide p4" data-page="04">
+      <div class="topbar">
+        <div class="brand"><span class="rabbit"></span> 红兔 · ZERO TO ONE</div>
+        <div class="topbar-center"><span class="active">路演分享</span><span>启动分享</span></div>
+        <div class="topbar-right">
+          <div class="tag red"><span class="dot"></span>Demo</div>
+          <div class="pagenum">04 / 08</div>
+          <div class="progress-ring"></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="p4-left fade-up d1">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="phone-header">
+                <div class="logo-mini"></div>
+                <h4>红兔 · 封面体检室</h4>
+                <p>两步让你的封面从「划走」变「点开」</p>
+              </div>
+              <div class="phone-card">
+                <h5>诊断结果</h5>
+                <div class="score-row"><span class="lbl">视觉冲击</span><div class="bar"><i style="width: 62%;"></i></div><span class="v">62</span></div>
+                <div class="score-row"><span class="lbl">文字呈现</span><div class="bar"><i style="width: 45%;"></i></div><span class="v">45</span></div>
+                <div class="score-row"><span class="lbl">构图主体</span><div class="bar"><i style="width: 78%;"></i></div><span class="v">78</span></div>
+                <div class="score-row"><span class="lbl">色彩情绪</span><div class="bar"><i style="width: 70%;"></i></div><span class="v">70</span></div>
+                <div class="score-row"><span class="lbl">小红书味</span><div class="bar"><i style="width: 52%;"></i></div><span class="v">52</span></div>
+              </div>
+              <div class="phone-overall">
+                <div class="l">综合评分<br/><b>建议优化</b></div>
+                <div class="r">61<small>/100</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p4-right">
+          <div class="eyebrow" style="margin-bottom: 14px;">— PRODUCT DEMO</div>
+          <h2 class="p4-headline">
+            <span class="reveal"><span>上传 → 诊断 →</span></span><br/>
+            <span class="reveal"><span><span class="red">直接改图</span>。</span></span>
+          </h2>
+
+          <div class="steps">
+            <div class="step fade-up d2">
+              <div class="badge">01</div>
+              <div class="n">— UPLOAD</div>
+              <h4>上传<br/>封面图</h4>
+              <p>支持 PNG / JPG / WEBP，5MB 以内，拖拽即可。</p>
+            </div>
+            <div class="arrow-flow"></div>
+            <div class="step fade-up d3">
+              <div class="badge">02</div>
+              <div class="n">— DIAGNOSE</div>
+              <h4>5 个维度<br/>AI 体检</h4>
+              <p>视觉冲击、文字、构图、色彩、小红书味，逐项打分给处方。</p>
+            </div>
+            <div class="arrow-flow"></div>
+            <div class="step fade-up d4">
+              <div class="badge">03</div>
+              <div class="n">— REGENERATE</div>
+              <h4>原图基础上<br/>一键改进</h4>
+              <p>不是从头生成，而是在原图基础上精修，保留主体。</p>
+            </div>
+          </div>
+
+          <div class="p4-callout fade-up d5">
+            <span class="big">30秒</span>
+            <span class="txt">从看不懂封面在哪不行 → 拿到改进版</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= P5 商业化验证 ================= -->
+    <section class="slide p5" data-page="05">
+      <div class="topbar">
+        <div class="brand"><span class="rabbit"></span> 红兔 · ZERO TO ONE</div>
+        <div class="topbar-center"><span class="active">路演分享</span><span>启动分享</span></div>
+        <div class="topbar-right">
+          <div class="tag green"><span class="dot"></span>商业化验证</div>
+          <div class="pagenum">05 / 08</div>
+          <div class="progress-ring"></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">— TRACTION &amp; VALIDATION</div>
+        <h2 class="megatitle" style="margin-top: 14px; font-size: clamp(48px, 5.2vw, 92px);">
+          <span class="reveal"><span>上线 <span class="em">7 天</span>，</span></span><br/>
+          <span class="reveal"><span>真实用户已经在付费。</span></span>
+        </h2>
+
+        <div class="p5-grid">
+          <div class="stat-grid">
+            <div class="stat-card fade-up d1">
+              <div class="lbl">— 累计用户咨询</div>
+              <div>
+                <div class="num"><span class="counter" data-count="12">0</span></div>
+                <div class="delta"></div>
+              </div>
+            </div>
+            <div class="stat-card dark fade-up d2">
+              <div class="lbl">— 内测群人数</div>
+              <div>
+                <div class="num"><span class="counter" data-count="7">0</span><span class="unit">人</span></div>
+                <div class="delta"></div>
+              </div>
+            </div>
+            <div class="stat-card fade-up d3">
+              <div class="lbl">— 付费转化率</div>
+              <div>
+                <div class="num"><span style="color: var(--red);"><span class="counter" data-count="52.1">0</span></span><span class="unit">%</span></div>
+                <div class="delta"></div>
+              </div>
+            </div>
+            <div class="stat-card fade-up d4">
+              <div class="lbl">— 回复率 / 留存</div>
+              <div>
+                <div class="num"><span class="counter" data-count="82">0</span><span class="unit">%</span></div>
+                <div class="delta"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="screenshot-stack fade-up d5">
+            <div class="label">— PROOF · 真实付费 &amp; 用户反馈截图</div>
+            <div class="chat-mock user">
+              <div class="who">小红书博主 @奶油泡芙 · 28w 粉</div>
+              已经付了 Pro <span class="pay">¥9.9 已付款</span><br/>
+              改完那张封面点击率从 4.2% 涨到 11.8%，直接爆了。
+            </div>
+            <div class="chat-mock">
+              <div class="who">内测群 · 用户反馈 #042</div>
+              这玩意儿比我请的设计师还懂小红书，处方写得太准了…
+            </div>
+            <div class="chat-mock user">
+              <div class="who">电商运营 @阿肆 · 私信</div>
+              团队 5 个号都要接入，有没有<b style="color: var(--red);">企业版</b>？
+            </div>
+            <div class="chat-mock">
+              <div class="who">内测群 · 用户反馈 #117</div>
+              「小红书味」这个维度太骚了，戳中痛点。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= P6 商业模式 ================= -->
+    <section class="slide p6" data-page="06">
+      <div class="topbar">
+        <div class="brand"><span class="rabbit"></span> 红兔 · ZERO TO ONE</div>
+        <div class="topbar-center"><span class="active">路演分享</span><span>启动分享</span></div>
+        <div class="topbar-right">
+          <div class="tag green"><span class="dot"></span>商业模式</div>
+          <div class="pagenum">06 / 08</div>
+          <div class="progress-ring"></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">— BUSINESS MODEL · PRICING</div>
+        <h2 class="megatitle" style="margin-top: 14px; font-size: clamp(48px, 5vw, 88px);">
+          <span class="reveal"><span>免费上瘾，</span></span><br/>
+          <span class="reveal"><span>付费一次<span class="em">就回本</span>。</span></span>
+        </h2>
+
+        <div class="price-grid">
+          <div class="price-card fade-up d1">
+            <div class="tag-mini">FREE</div>
+            <h3>免费版</h3>
+            <div class="lbl">个人创作者尝鲜</div>
+            <div class="price">¥0<small>/ 永久</small></div>
+            <div class="unit-line">每月 3 次诊断 + 1 次改图</div>
+            <ul>
+              <li>5 维度评分诊断</li>
+              <li>基础改图（带水印）</li>
+              <li>诊断处方 PDF 导出</li>
+            </ul>
+          </div>
+
+          <div class="price-card featured fade-up d2">
+            <div class="tag-mini">PRO · 推荐</div>
+            <h3>Pro 会员</h3>
+            <div class="lbl">日更博主 / 内容工作室</div>
+            <div class="price red">¥9.9<small>/ 月</small></div>
+            <div class="unit-line">不限次数 · 无水印 · 优先队列</div>
+            <ul>
+              <li>无限诊断 + 无限改图</li>
+              <li>历史封面追踪 + 涨粉数据回传</li>
+              <li>专属"小红书味"风格库</li>
+              <li>新功能 7 天内测优先</li>
+            </ul>
+          </div>
+
+          <div class="price-card fade-up d3">
+            <div class="tag-mini">ENTERPRISE</div>
+            <h3>企业版</h3>
+            <div class="lbl">MCN / 品牌方 / 电商团队</div>
+            <div class="price">定制<small></small></div>
+            <div class="unit-line">起步 ¥79 / 月</div>
+            <ul>
+              <li>多账号矩阵 / 团队协作</li>
+              <li>品牌词风格定制训练</li>
+              <li>API 接入 / 私有部署</li>
+              <li>1v1 投放策略陪跑</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="row" style="border: none; padding: 14px 0 0;">
+          <div class="k" style="font-size: 18px; color: var(--ink-3); font-family: var(--font-mono); letter-spacing: .1em;">— UNIT ECONOMICS</div>
+          <div class="v" style="font-size: 16px;">单用户获客成本 <b>¥0</b> · LTV / CAC ≈ <b>无限大</b>（口碑自传播）</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= P7 团队与差异性 ================= -->
+    <section class="slide p7" data-page="07">
+      <div class="topbar">
+        <div class="brand"><span class="rabbit"></span> 红兔 · ZERO TO ONE</div>
+        <div class="topbar-center"><span class="active">路演分享</span><span>启动分享</span></div>
+        <div class="topbar-right">
+          <div class="tag"><span class="dot"></span>团队差异</div>
+          <div class="pagenum">07 / 08</div>
+          <div class="progress-ring"></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">— FOUNDER-MARKET FIT</div>
+        <h2 class="megatitle" style="margin-top: 14px; font-size: clamp(48px, 5vw, 92px);">
+          <span class="reveal"><span>我们自己，</span></span><br/>
+          <span class="reveal"><span>就是<span class="em">真实用户</span>。</span></span>
+        </h2>
+
+        <div class="team-grid">
+          <div class="skill-card fade-up d1">
+            <div class="n">— 01 · CONTENT</div>
+            <h4>内容</h4>
+            <p>团队内 3 位小红书博主，累计 80w+ 粉丝，日更内容验证过的封面策略。</p>
+          </div>
+          <div class="skill-card red fade-up d2">
+            <div class="n">— 02 · DESIGN</div>
+            <h4>设计</h4>
+            <p>前大厂视觉设计师 + 多份爆款封面操盘经验，懂"视觉锤"。</p>
+          </div>
+          <div class="skill-card fade-up d3">
+            <div class="n">— 03 · AI</div>
+            <h4>AI</h4>
+            <p>多模态大模型 + 图像编辑 pipeline 工程化经验，模型层 know-how。</p>
+          </div>
+          <div class="skill-card red fade-up d4">
+            <div class="n">— 04 · COMMERCIAL</div>
+            <h4>商业化</h4>
+            <p>过往独立项目从 0 做到月入 5w+，懂订阅、懂转化、懂留存。</p>
+          </div>
+        </div>
+
+        <div class="p7-conclusion fade-up d5">
+          <div class="big">不是做<span class="red">大平台</span>，而是做<span class="red">小闭环</span>。</div>
+          <div class="small">SMALL LOOP > BIG PLATFORM</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= P8 下一步 ================= -->
+    <section class="slide p8" data-page="08">
+      <div class="topbar">
+        <div class="brand"><span class="rabbit"></span> 红兔 · ZERO TO ONE</div>
+        <div class="topbar-center"><span class="active">路演分享</span><span>启动分享</span></div>
+        <div class="topbar-right">
+          <div class="tag red"><span class="dot"></span>下一步计划</div>
+          <div class="pagenum">08 / 08</div>
+          <div class="progress-ring"></div>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">— ROADMAP</div>
+        <h2 class="megatitle" style="margin-top: 14px; font-size: clamp(48px, 5vw, 88px);">
+          <span class="reveal"><span>7 天，30 天，</span></span><br/>
+          <span class="reveal"><span>3 个月。<span class="em">从 0 到 1。</span></span></span>
+        </h2>
+
+        <div class="timeline">
+          <div class="timeline-line"></div>
+          <div class="timeline-row">
+            <div class="tl-node">
+              <div class="when">— NEXT 7 DAYS</div>
+              <h4>跑通付费闭环</h4>
+              <ul>
+                <li>Pro 会员订阅打磨</li>
+                <li>内测 500 → 2000 用户</li>
+              </ul>
+            </div>
+            <div class="tl-node">
+              <div class="when">— NEXT 30 DAYS</div>
+              <h4>建立数据飞轮</h4>
+              <ul>
+                <li>封面点击率反向训练</li>
+                <li>「小红书味」风格库 v2</li>
+              </ul>
+            </div>
+            <div class="tl-node">
+              <div class="when">— NEXT 3 MONTHS</div>
+              <h4>横向到内容全链路</h4>
+              <ul>
+                <li>笔记标题 + 正文 AI 体检</li>
+                <li>抖音 / B 站封面拓展</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="p8-end">
+          <div class="l">谢谢评委。<span class="red"> 红兔，先帮你把封面救活。</span></div>
+          <div class="r">— ZERO TO ONE · 2026</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 导航 -->
+  <div class="nav">
+    <button id="prev" title="上一页">‹</button>
+    <div class="dots" id="dots"></div>
+    <button id="next" title="下一页">›</button>
+  </div>
+
+  <div class="hint">← / → 切换 · F 全屏</div>
+</div>
+
+<script>
+  const slidesEl = document.getElementById("slides");
+  const slides = document.querySelectorAll(".slide");
+  const total = slides.length;
+  let idx = 0;
+
+  // 构建 dots
+  const dotsEl = document.getElementById("dots");
+  slides.forEach((_, i) => {
+    const d = document.createElement("i");
+    d.addEventListener("click", () => go(i));
+    dotsEl.appendChild(d);
+  });
+  const dotEls = dotsEl.querySelectorAll("i");
+
+  function go(n){
+    idx = Math.max(0, Math.min(total - 1, n));
+    slidesEl.style.transform = `translateX(-${idx * 100}%)`;
+    slides.forEach((s, i) => s.classList.toggle("active", i === idx));
+    dotEls.forEach((d, i) => d.classList.toggle("on", i === idx));
+    // 触发计数器和打字机
+    if(slides[idx].classList.contains("p2") || slides[idx].classList.contains("p5")){
+      startCounters(slides[idx]);
+    }
+    if(idx === 0){ startTyping(); }
+  }
+
+  document.getElementById("prev").addEventListener("click", () => go(idx - 1));
+  document.getElementById("next").addEventListener("click", () => go(idx + 1));
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "ArrowRight" || e.key === " ") go(idx + 1);
+    else if(e.key === "ArrowLeft") go(idx - 1);
+    else if(e.key.toLowerCase() === "f"){
+      if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  // count-up
+  function startCounters(slide){
+    const counters = slide.querySelectorAll(".counter");
+    counters.forEach(c => {
+      if(c.dataset.started) return;
+      c.dataset.started = "1";
+      const target = parseFloat(c.dataset.count);
+      const isFloat = String(target).includes(".");
+      const dur = 1400;
+      const start = performance.now();
+      function step(now){
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const val = target * eased;
+        c.textContent = isFloat ? val.toFixed(1) : Math.round(val).toLocaleString();
+        if(t < 1) requestAnimationFrame(step);
+        else c.textContent = isFloat ? target.toFixed(1) : Math.round(target).toLocaleString();
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  // 打字机
+  const taglineText = "小红书封面 AI 体检室 — 两步让你的封面，从「划走」变「点开」。";
+  function startTyping(){
+    const el = document.getElementById("typed");
+    if(el.dataset.done) return;
+    el.dataset.done = "1";
+    let i = 0;
+    el.textContent = "";
+    function type(){
+      if(i >= taglineText.length) return;
+      el.textContent += taglineText[i++];
+      setTimeout(type, 55 + Math.random()*40);
+    }
+    setTimeout(type, 1400);
+  }
+
+  // 初始化
+  setTimeout(() => {
+    slides[0].classList.add("active");
+    dotEls[0].classList.add("on");
+    startTyping();
+  }, 80);
+
+  // 触摸 / 鼠标拖动
+  let startX = 0, dragging = false;
+  slidesEl.addEventListener("pointerdown", (e) => { startX = e.clientX; dragging = true; });
+  window.addEventListener("pointerup", (e) => {
+    if(!dragging) return;
+    dragging = false;
+    const dx = e.clientX - startX;
+    if(Math.abs(dx) > 80){ go(idx + (dx < 0 ? 1 : -1)); }
+  });
+</script>
+</body>
+</html>
